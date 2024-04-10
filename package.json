@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "@heroicons/vue": "^2.0.18"
+  }
+}
