@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const RedisStore = require('connect-redis').default;
 require('dotenv').config();
 const server = require('http').createServer(app);
@@ -54,7 +55,8 @@ io.on('connection', (socket) => {
   const addNewUser = async (username, socketId) => {
     try {
       const existingUser = await getUser({ username });
-
+      console.log('Existing userrrrrrrrr');
+      console.log(existingUser);
       if (existingUser) {
         await pool.query('UPDATE online SET socketid = $1 WHERE username = $2', [
           socketId,
@@ -87,7 +89,11 @@ io.on('connection', (socket) => {
 
   const getUser = async (username) => {
     try {
-      const response = await pool.query('SELECT * FROM online WHERE username=$1', [username]);
+      console.log('GetUser username');
+      console.log(username);
+      const response = await pool.query('SELECT * FROM online WHERE username=$1', [
+        username.username,
+      ]);
       return response.rows[0];
     } catch (error) {
       console.error('Error fetching user:', error.message);
@@ -471,8 +477,10 @@ app.post('/handlelogin', async (req, res) => {
     const allUsers = await pool.query('SELECT * FROM "user1"');
     const usersData = allUsers.rows;
     const { username, password } = req.body;
+    // const password = await bcrypt.hash(plainTextPassword, salt);
+
     const isValidLogin = usersData.some(
-      (user) => user.user_name === username && user.password === password,
+      (user) => user.user_name === username && bcrypt.compare(password, user.password),
     );
     if (isValidLogin) {
       // req.session.username = username;
@@ -651,17 +659,16 @@ app.post('/addpost', upload.array('files', 10), async (req, res) => {
     }
     var newFilePaths = [];
     console.log(files);
-    const folderPath = 'backend/newImages';
-    var count1 = 0;
-    countFilesInFolder(folderPath).then((count) => {
-      console.log(`Number of files in ${folderPath}: ${count}`);
-      count1 = count + 1;
-    });
+    // const folderPath = 'backend/newImages';
+    // var count1 = 0;
+    // countFilesInFolder(folderPath).then((count) => {
+    //   console.log(`Number of files in ${folderPath}: ${count}`);
+    //   count1 = count + 1;
+    // });
     for (const file of files) {
       const originalFilePath = file.path;
       const newFileName = file.originalname;
-      const newFilePath = 'newImages/' + String(count1);
-      count1++;
+      const newFilePath = 'newImages/' + newFileName;
       newFilePaths.push(newFilePath);
       fs.copyFile(originalFilePath, newFilePath, (copyErr) => {
         if (copyErr) {
@@ -697,13 +704,15 @@ app.post('/addpost', upload.array('files', 10), async (req, res) => {
 app.post('/insert', async (req, res) => {
   try {
     const { username, password, email } = req.body;
+    const password1 = await bcrypt.hash(password, salt);
+
     const fs = require('fs');
     const filePath = '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/profile.png'; // Replace with the actual file path
     if (fs.existsSync(filePath)) {
       const fileContent = fs.readFileSync(filePath);
       const newTodo = await pool.query(
         'INSERT INTO "user1" (user_name, password, email, profile) VALUES($1, $2, $3, $4) RETURNING *',
-        [username, password, email, fileContent],
+        [username, password1, email, fileContent],
       );
       await newTodo.json();
       req.session.user = {
@@ -1372,7 +1381,6 @@ app.post('/editpost', upload.array('files'), async (req, res) => {
 app.put('/deletepost', async (req, res) => {
   try {
     const { id } = req.body;
-    // console.log(id);
     const response1 = await pool.query('DELETE FROM post WHERE id=$1', [id]);
     const response2 = await pool.query('DELETE * FROM messages WHERE post_id=$1', [id]);
     res.json({ message: 'ok' });
@@ -1575,6 +1583,15 @@ app.post('/deletechat', async (req, res) => {
       'DELETE FROM chats WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)',
       [user1, user2],
     );
+    const response2 = await pool.query(
+      'UPDATE messages SET delete1 = $1 WHERE (user1 = $2 AND user2 = $3)',
+      ['yes', user1, user2],
+    );
+    const response3 = await pool.query(
+      'UPDATE messages SET delete2 = $1 WHERE (user1 = $2 AND user2 = $3)',
+      ['yes', user2, user1],
+    );
+
     res.json({ success: true });
   } catch (err) {
     console.error(err.message);

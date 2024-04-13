@@ -2,32 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { socket } from './DashBoard';
 import { useIndex } from './IndexContext';
-// const socket = io.connect('http://localhost:3001', { autoConnect: false });
-const PYMK = ({username}) => {
+
+const PYMK = ({ username }) => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [bool1, setBool1] = useState([]);
-  // const { username } = useIndex();
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     socket.connect();
-    console.log(socket.id);
     socket.on('notifCount', async (count) => {
-      await fetchpeople();
+      await fetchPeople();
     });
   }, []);
+
   const requestsent1 = async (person, idx) => {
     try {
       const updatedBool1 = [...bool1];
       updatedBool1[idx] = !updatedBool1[idx];
 
       if (updatedBool1[idx]) {
-        await sentrequest1(person);
+        await sentRequest1(person);
         socket.connect();
-        console.log('sent');
         socket.emit('notif', person);
       } else {
-        await deleterequest1(person);
+        await deleteRequest1(person);
         socket.connect();
-        console.log('deletenotifsent');
         socket.emit('notif', person);
       }
 
@@ -64,7 +64,7 @@ const PYMK = ({username}) => {
     }
   };
 
-  const sentrequest1 = async (person) => {
+  const sentRequest1 = async (person) => {
     try {
       const id = 'follow';
       const pid = -1;
@@ -80,7 +80,6 @@ const PYMK = ({username}) => {
       }
 
       const responseData = await response.json();
-      console.log(responseData);
 
       if (!responseData.success) {
         throw new Error(`User creation failed: ${responseData.message}`);
@@ -92,7 +91,7 @@ const PYMK = ({username}) => {
     }
   };
 
-  const deleterequest1 = async (person) => {
+  const deleteRequest1 = async (person) => {
     try {
       const body = { person1: username, person2: person };
       const response = await fetch('http://localhost:3001/deleterequest', {
@@ -106,7 +105,6 @@ const PYMK = ({username}) => {
       }
 
       const responseData = await response.json();
-      // console.log(responseData);
 
       if (!responseData.success) {
         throw new Error(`User creation failed: ${responseData.message}`);
@@ -118,7 +116,7 @@ const PYMK = ({username}) => {
     }
   };
 
-  const fetchpeople = async () => {
+  const fetchPeople = async () => {
     try {
       const myHeaders = new Headers();
       myHeaders.append('Content-Type', 'application/json');
@@ -131,17 +129,16 @@ const PYMK = ({username}) => {
 
       const response = await fetch('http://localhost:3001/notfollowing', requestOptions);
       const result = await response.json();
-      console.log(result);
       const filteredResult = result.filter((user) => user.person1 !== username);
-      console.log(filteredResult);
       setUsers(filteredResult);
+      setFilteredUsers(filteredResult);
     } catch (error) {
       console.error('Error fetching people:', error);
     }
   };
 
   useEffect(() => {
-    fetchpeople();
+    fetchPeople();
   }, [username]);
 
   useEffect(() => {
@@ -149,13 +146,28 @@ const PYMK = ({username}) => {
     fetchrequests();
   }, [users]);
 
+  // Filter the users based on the search query
+  useEffect(() => {
+    const filteredList = users.filter((user) =>
+      user.person1.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+    setFilteredUsers(filteredList);
+  }, [users, searchQuery]);
+
   return (
-    <div className='flex flex-col border-2  border-orange-200 shadow-md lg:shadow-2xl lg:h-[45rem] items-center space-y-6 py-3 px-2 bg-orange-50 mr-2 mt-2 h-screen rounded-lg overflow-y-scroll'>
+    <div className='flex flex-col border-2 w-[20%] border-orange-200 shadow-md lg:shadow-2xl lg:h-[45rem] items-center space-y-6 py-3 px-2 bg-orange-50 mr-2 mt-2 h-screen rounded-lg overflow-y-scroll'>
       <div className='text-cyan-950 text-3xl mb-5 m-4 bg-orange-50'>Find Friends</div>
-      {users.map((user, idx) => (
+      <input
+        type='text'
+        placeholder='Search users...'
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className='w-full p-2 mb-4 rounded-md border border-gray-300'
+      />
+      {filteredUsers.map((user, idx) => (
         <div
           key={user.person1}
-          className='flex w-full flex-row overflow-x-scroll items-center space-x-12 justify-between rounded-md bg-stone-50 shadow-md border-2 border-sky-300 p-3 m-1'
+          className='flex flex-row overflow-x-scroll w-full items-center space-x-12 justify-between rounded-md bg-stone-50 shadow-md border-2 border-sky-300 p-3 m-1'
         >
           <span className='flex items-center space-x-1'>
             <img

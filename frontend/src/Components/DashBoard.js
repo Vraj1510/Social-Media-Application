@@ -86,6 +86,20 @@ function DashBoard() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // useEffect(() => {
+  //   // console.log(username===undefined);
+  //   if(username===undefined)
+  //   {
+
+  //   }
+  //   else{
+  //   socket.connect();
+  //   socket.emit('newUser', username);
+      
+  //   }
+  //   // console.log(onlineUsers);
+  // }, [username]);
   return (
     <div
       className={`flex  ${

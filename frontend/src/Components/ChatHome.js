@@ -7,8 +7,24 @@ import Chat from './Chat';
 import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { socket } from './DashBoard';
+import remove from '../Images/remove.png';
 import { useIndex } from './IndexContext';
 // const socket = io.connect('http://localhost:3001');
+
+  const fetchProfileImage = async (username1) => {
+    try {
+      const body = { username1 };
+      const response = await fetch('http://localhost:3001/fetchImage', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+      return `data:image/png;base64,${result.imageContent}`;
+    } catch (err) {
+      console.error('Error fetching image:', err.message);
+    }
+  };
 const ChatHome = () => {
   useEffect(() => {
     const checkSession = async () => {
@@ -39,10 +55,12 @@ const ChatHome = () => {
   const { username: username1 } = useIndex();
   const { state } = useLocation();
   const { index1, updateIndex1 } = useIndex();
+  const [confirm, setConfirm] = useState(false);
   console.log(index1);
   const [username, updateUsername] = useState(username1);
   const [onlineUsers, setOnlineUsers] = useState([...(state && state.onlineUsers)]);
   const [chats, setChats] = useState([]);
+  const [filteredChats, setFilteredChats] = useState([]);
   const [addFriend, setAddFriend] = useState(false);
   const [findAFriend, setFindAFriend] = useState(true);
   const [explore, setExplore] = useState(false);
@@ -51,6 +69,14 @@ const ChatHome = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
   const navigateToDashboard = (state) => {
     navigate('/app', state);
+  };
+  const handleSearch = (e) => {
+    const searchQuery = e.target.value.toLowerCase();
+    const filteredChats1 = chats.filter((chat) =>
+      chat.username.toLowerCase().includes(searchQuery),
+    );
+    // setChats(filteredChats);
+    setFilteredChats(filteredChats1);
   };
   useEffect(() => {
     const handleResize = () => {
@@ -85,15 +111,15 @@ const ChatHome = () => {
     }
   }, []);
 
-  useEffect(() => {
-    try {
-      socket.connect();
-      socket.emit('newUser', username);
-      console.log(onlineUsers);
-    } catch (err) {
-      console.log(err);
-    }
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     socket.connect();
+  //     socket.emit('newUser', username);
+  //     console.log(onlineUsers);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }, []);
   useEffect(() => {
     try {
       socket.connect();
@@ -240,7 +266,6 @@ const ChatHome = () => {
       console.error(err.message);
     }
   };
-
   const deletechat1 = async (user1, user2) => {
     try {
       const myHeaders = new Headers();
@@ -258,16 +283,19 @@ const ChatHome = () => {
         redirect: 'follow',
       };
 
+      console.log('DONE');
       const response = await fetch('http://localhost:3001/deletechat', requestOptions);
-
+      console.log(response);
       if (response.ok) {
-        // Wait for getchats to complete before updating the index
         updateIndex1((prevIndex) => Math.max(0, prevIndex - 1));
         setChats((chat1) => chat1.filter((chat) => chat.username !== user2));
-
-        await Promise.all([getchats(), fetchFriendData()]);
-
-        // Ensure that the state has been updated before accessing it
+        setFilteredChats((chat1) => chat1.filter((chat) => chat.username !== user2));
+        setConfirm(false);
+        // setList(async (list1) => [...list1, { username: user2, profileImage: await fetchProfileImage(user2) }]);
+        list.push({ username: user2, profileImage: await fetchProfileImage(user2) });
+        console.log(list);
+        console.log('DONE');
+        // await Promise.all([getchats(), fetchFriendData()]);
       } else {
         console.error('Failed to delete chat');
       }
@@ -296,10 +324,8 @@ const ChatHome = () => {
       const responseData = await response.json();
       console.log(responseData);
       setChats(responseData);
+      setFilteredChats(responseData);
       await fetchFriendData();
-      // } else {
-      //   console.error('Failed to fetch chats');
-      // }
     } catch (error) {
       console.error(error.message);
     }
@@ -409,9 +435,10 @@ const ChatHome = () => {
           <input
             className='h-[45px] w-full rounded-md p-2 border-2 border-sky-300 placeholder-gray-500'
             placeholder='Find A Chat'
+            onChange={handleSearch}
           ></input>
-          {chats &&
-            chats.map((chat, idx) => (
+          {filteredChats &&
+            filteredChats.map((chat, idx) => (
               <div
                 className='w-full flex justify-between space-x-3 p-2 border-2 border-orange-200 rounded-md shadow-md items-center flex-row bg-white mt-4 h-[70px]'
                 key={chat.username}
@@ -431,9 +458,6 @@ const ChatHome = () => {
                   {onlineUsers && onlineUsers.some((user) => user.username === chat.username) && (
                     <div className='w-3 h-3 bg-green-500 rounded-full'></div>
                   )}
-                  {/* {console.log(typeof maps.get(chat.username))}
-                {console.log(typeof 0)}
-                {console.log(maps.get(chat.username) > 0)} */}
                   {maps && maps.get(chat.username) > 0 && (
                     <div className='text-white bg-red-500 rounded-full px-1.5'>
                       {maps.get(chat.username)}
@@ -443,10 +467,44 @@ const ChatHome = () => {
                 <img
                   src={deletechat}
                   onClick={() => {
-                    deletechat1(username, chat.username);
+                    setConfirm(true);
                   }}
                   className='h-[30px] w-[30px]'
                 ></img>
+
+                {confirm && (
+                  <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
+                    <div className='flex flex-col absolute w-1/4 border-2 rounded-md items-center justify-center space-y-8 border-cyan-600 h-1/3 text-center text-cyan-950 bg-cyan-50'>
+                      <div className='text-4xl'>Delete Chat</div>
+                      <div className='text-sm mx-4'>Are You Sure You Want To Delete This Chat?</div>
+                      <div className='flex w-full justify-around'>
+                        <div
+                          onClick={async () => {
+                            await deletechat1(username, chat.username);
+                          }}
+                          className='bg-cyan-900 text-white w-1/3 py-1 rounded-md cursor-pointer shadow-2xl border-2 border-cyan-400'
+                        >
+                          Yes
+                        </div>
+                        <div
+                          onClick={() => {
+                            setConfirm(false);
+                          }}
+                          className='bg-cyan-900 text-white w-1/3 py-1 rounded-md cursor-pointer shadow-2xl border-2 border-cyan-400'
+                        >
+                          No
+                        </div>
+                      </div>
+                      <img
+                        src={remove}
+                        className='w-6 h-6 absolute -right-3 -top-11'
+                        onClick={() => {
+                          setConfirm(false);
+                        }}
+                      ></img>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
         </div>

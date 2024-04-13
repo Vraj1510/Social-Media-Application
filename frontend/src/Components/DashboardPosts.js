@@ -13,6 +13,7 @@ import { socket } from './DashBoard';
 import MainComment from './MainComment';
 import Comments from './Comments';
 import { useIndex } from './IndexContext';
+import SharePost from './SharePost';
 export const fetchPost = async (following2) => {
   try {
     var myHeaders = new Headers();
@@ -323,7 +324,7 @@ const DashBoardPosts = () => {
     fetchlikes();
   }, [posts]);
   return (
-    <div className='flex flex-col w-[97%] ml-1.5 overflow-y-scroll -mt-3 mb-2 lg:h-[100%] lg:w-[52%] md:mr-3 lg:-mt-2 md:-mt-2 lg:mr-0 lg:mx-1'>
+    <div className='flex flex-col w-[97%] ml-1.5 overflow-y-scroll -mt-3 mb-2 lg:h-[100%] lg:w-[45%] md:mr-3 lg:-mt-2 md:-mt-2  lg:mx-16'>
       {console.log(map)}
       {console.log(map1)}
       {console.log(posts)}
@@ -383,10 +384,7 @@ const DashBoardPosts = () => {
                       src={comment}
                       className='w-7 h-7 lg:w-8 lg:h-8 md:w-8 md:h-8 ml-4 cursor-pointer'
                     ></img>
-                    <img
-                      src={share}
-                      className='w-6 h-6 lg:w-7 lg:h-7 md:w-7 md:h-7 mt-0.5 ml-4 cursor-pointer'
-                    ></img>
+                    <SharePost id={post.id}></SharePost>
                   </div>
                   {console.log(map)}
                   {displayLikes === idx && (
@@ -438,19 +436,25 @@ const DashBoardPosts = () => {
                 </div>
                 {comment1 === post.id && (
                   <div className='fixed inset-0 flex items-center justify-center z-50 backdrop-filter w-full h-full backdrop-blur-sm bg-black bg-opacity-50'>
-                    <div className='fixed bg-white w-2/3 h-5/6 px-3 py-2 rounded-lg flex justify-between'>
+                    <div className='bg-white w-2/3 h-5/6 p-4 rounded-lg flex flex-col justify-between'>
                       <Comments
                         id={post.id}
                         comments1={[...comments]}
                         username={username}
                       ></Comments>
-                      <img
-                        src={remove}
-                        onClick={() => {
-                          setComment(-1);
-                        }}
-                        className='absolute -top-3 -right-3 h-6 w-6 cursor-pointer'
-                      ></img>
+                      <div className='flex flex-row space-x-2 items-center'>
+                        <button
+                          className='bg-sky-300 py-1.5 -mb-1 px-2 border-2 rounded-md shadow-md border-gray-300'
+                          onClick={() => {
+                            setComment(-1);
+                          }}
+                        >
+                          Close
+                        </button>
+                        <div className='-mb-2  w-full'>
+                          <MainComment id={post.id} username={username}></MainComment>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

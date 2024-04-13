@@ -8,6 +8,7 @@ import { IoSend } from 'react-icons/io5';
 import more1 from '../Images/more1.png';
 import remove from '../Images/remove.png';
 import more2 from '../Images/more2.png';
+import image_icon from '../Images/image_icon.png';
 import EmojiPicker from 'emoji-picker-react';
 import { socket } from './DashBoard';
 import logout1 from '../Images/logout.png';
@@ -128,7 +129,9 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         messagesByDay1.set(dayKey, []);
       }
       if (message.post_id > 0) {
-        await fetchpostbyid(message.post_id);
+        try {
+          await fetchpostbyid(message.post_id);
+        } catch (err) {}
       }
       const formattedMessage = {
         user1: message.user1,
@@ -152,8 +155,23 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         post_id: message.post_id,
         image_path: message.image_path,
       };
-      messagesByDay1.get(dayKey).push(formattedMessage);
+      if (message.user1 === username) {
+        if (message.delete1 === 'no') {
+          console.log('Inserting message for user1');
+          messagesByDay1.get(dayKey).push(formattedMessage);
+        } else {
+          console.log('Message for user1 is marked as deleted');
+        }
+      } else {
+        if (message.delete2 === 'no') {
+          console.log('Inserting message for user2');
+          messagesByDay1.get(dayKey).push(formattedMessage);
+        } else {
+          console.log('Message for user2 is marked as deleted');
+        }
+      }
     });
+    console.log(messagesByDay1);
     setMessagesByDay(messagesByDay1);
     maptexts(map1);
   };
@@ -209,10 +227,14 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
       formData.append('month', date.getMonth());
       formData.append('year', date.getFullYear());
       formData.append('reply', reply);
+      formData.append('post_id', -1);
       var ampm = date.getHours() > 12 ? 'PM' : 'AM';
       formData.append('ampm', ampm);
       formData.append('file', file); // Make sure 'file' contains the file data
-
+      if (file) {
+        getTexts(room);
+      }
+      // file=null;
       // Log form data entries for debugging
       for (const [name, value] of formData.entries()) {
         console.log(`${name}: ${value}`);
@@ -248,10 +270,13 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         delete1: 'no',
         delete2: 'no',
         edited: 'no',
+        post_id: -1,
+        image_path: '',
       };
 
       // Update state or perform other actions as needed
-      console.log(raw1); // Log the constructed data object
+      console.log(raw1); // Log the constructed data objectsetMessages((prevMessages) => [...prevMessages, ...raw]);
+      setmessages((prevMessages) => [...prevMessages, raw1]);
     } catch (err) {
       console.error(err.message);
     }
@@ -317,8 +342,27 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         post_id: message.post_id,
         image_path: message.image_path,
       };
-      messagesByDay1.get(dayKey).push(formattedMessage);
+      console.log(message.user1 === username);
+      console.log(message.delete1 === 'no');
+      console.log(message.delete2 === 'no');
+
+      if (message.user1 === username) {
+        if (message.delete1 === 'no') {
+          console.log('Inserting message for user1');
+          messagesByDay1.get(dayKey).push(formattedMessage);
+        } else {
+          console.log('Message for user1 is marked as deleted');
+        }
+      } else {
+        if (message.delete2 === 'no') {
+          console.log('Inserting message for user2');
+          messagesByDay1.get(dayKey).push(formattedMessage);
+        } else {
+          console.log('Message for user2 is marked as deleted');
+        }
+      }
     });
+    console.log(messagesByDay1);
     setMessagesByDay(messagesByDay1);
     maptexts(map1);
   };
@@ -434,14 +478,14 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
       setTyping(false);
     }
   };
-  useEffect(() => {
-    try {
-      socket.connect();
-      socket.emit('newUser', username);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     socket.connect();
+  //     socket.emit('newUser', username);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }, []);
   useEffect(() => {
     setOnlineUsers(onlineUsers1);
   }, [onlineUsers1, index1]);
@@ -578,7 +622,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         </div>
         <div className='w-full bg-gray-300 h-[2px]'></div>
         <div className='p-1 h-[83.5%] bg-orange-50 overflow-y-scroll'>
-          {console.log(typeof messagesByDay)}
+          {console.log(messagesByDay)}
           {Array.from(messagesByDay).map(([key, value]) => {
             const arr1 = key.split('-');
             arr1.map((el) => {
@@ -641,13 +685,15 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
             });
             return (
               <div key={key} className='flex w-full flex-col'>
-                {/* {console.log(value.length)} */}
+                {console.log(value)}
                 {/* backend/newImages */}
-                <div className='flex flex-row items-center justify-between'>
-                  <div className='flex-grow h-[1px] bg-gradient-to-r from-transparent to-cyan-950'></div>
-                  <div className='z-10 text-cyan-950 text-lg p-3'>{time1}</div>
-                  <div className='flex-grow h-[1px] bg-gradient-to-r from-cyan-950 to-transparent'></div>
-                </div>
+                {value.length > 0 && (
+                  <div className='flex flex-row items-center justify-between'>
+                    <div className='flex-grow h-[1px] bg-gradient-to-r from-transparent to-cyan-950'></div>
+                    <div className='z-10 text-cyan-950 text-lg p-3'>{time1}</div>
+                    <div className='flex-grow h-[1px] bg-gradient-to-r from-cyan-950 to-transparent'></div>
+                  </div>
+                )}
                 {/* backend/newImages/airobot.png */}
                 {value.map((text, index) => {
                   const isCurrentUser = text.user1 === username;
@@ -764,6 +810,27 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                             <div className='flex flex-col mr-2 rounded-md my-0.5 ml-auto bg-cyan-800'>
                               {text.replyid !== '' && texts.has(parseInt(text.replyid)) ? (
                                 <div className='mx-2 border-2 border-sky-400 rounded-md shadow-md mt-2 py-1 w-11/12 px-1 text-cyan-950 text-lg bg-white'>
+                                  {console.log(texts.get(parseInt(text.replyid)).post_id)}
+                                  {console.log(posts)}
+                                  {console.log(
+                                    posts.get(texts.get(parseInt(text.replyid)).post_id),
+                                  )}
+                                  {texts.get(parseInt(text.replyid)).post_id > 0 &&
+                                    posts.size > 0 && (
+                                      <PostDisplay
+                                        post={posts.get(texts.get(parseInt(text.replyid)).post_id)}
+                                      ></PostDisplay>
+                                    )}
+                                  {texts.get(parseInt(text.replyid)).image_path !== '' && (
+                                    <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
+                                      <img
+                                        src={`data:image/png;base64,${
+                                          texts.get(parseInt(text.replyid)).image_path
+                                        }`}
+                                        className='w-64 h-64'
+                                      />
+                                    </div>
+                                  )}
                                   {texts.get(parseInt(text.replyid)).message}
                                 </div>
                               ) : (
@@ -771,32 +838,39 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                               )}
                               <div
                                 className={`flex flex-row w-full ${
-                                  text.post_id > 0 ? 'space-x-10 mt-1 ' : ''
+                                  text.post_id > 0 || text.image_path !== ''
+                                    ? 'space-x-10 mt-1 '
+                                    : ''
                                 }`}
                               >
-                                {text.post_id > 0 ? (
-                                  <div
-                                    className={`rounded w-[120%] px-3 pb-2 pt-1.5 mb-1 -mr-1.5 text-lg text-white`}
-                                  >
-                                    {posts.get(text.post_id) && (
-                                      <PostDisplay post={posts.get(text.post_id)}></PostDisplay>
-                                    )}
-                                  </div>
-                                ) : text.image_path !== null ? (
-                                  <div className='w-[320%]'>
-                                    <img
-                                      src={`data:image/png;base64,${text.image_path}`}
-                                      className='w-80 h-64 py-3 px-2 pl-3 -mr-16 '
-                                    ></img>
-                                  </div>
-                                ) : (
-                                  // If neither text.post_id nor text.image_path conditions are met
-                                  <div
-                                    className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5  text-lg text-white`}
-                                  >
-                                    {text.message}
-                                  </div>
-                                )}
+                                <div
+                                  className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5 text-lg  ${
+                                    isCurrentUser ? 'text-white' : 'text-cyan-950'
+                                  }`}
+                                  style={{
+                                    width:
+                                      text.post_id > 0 || text.image_path !== ''
+                                        ? 'calc(100% - 64px)'
+                                        : 'auto',
+                                  }}
+                                >
+                                  {text.post_id > 0 && posts.size > 0 ? (
+                                    <div className='rounded w-[120%] px-3 pb-2 pt-3 mb-1 pr-12 -mr-1.5 text-white'>
+                                      {posts.get(text.post_id) && (
+                                        <PostDisplay post={posts.get(text.post_id)} />
+                                      )}
+                                    </div>
+                                  ) : text.image_path !== '' ? (
+                                    <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
+                                      <img
+                                        src={`data:image/png;base64,${text.image_path}`}
+                                        className='w-64 h-64'
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div>{text.message}</div>
+                                  )}
+                                </div>
 
                                 <div className='flex flex-col items-end h-[44px] w-[80px] rounded justify-between '>
                                   {isCurrentUser && moreid === text.id && (
@@ -819,7 +893,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                                       >
                                         Delete
                                       </button>
-                                      {text.post_id === null && text.image_path === null && (
+                                      {text.post_id === -1 && text.image_path === '' && (
                                         <button
                                           className='text-sm'
                                           onClick={() => {
@@ -848,12 +922,14 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                                       alt='more'
                                     ></img>
                                   </div>
-                                  {!text.post_id > 0 && text.image_path === null && (
+                                  {console.log(text.post_id === -1)}
+                                  {console.log(text.image_path === '')}
+                                  {text.post_id === -1 && text.image_path === '' && (
                                     <div className='text-sm text-white w-16 mb-1 '>{time}</div>
                                   )}
                                 </div>
                               </div>
-                              {(text.post_id > 0 || text.image_path !== null) && (
+                              {(text.post_id > 0 || text.image_path !== '') && (
                                 <div className='text-sm ml-2.5 -mt-1.5 text-white w-16 mb-1 '>
                                   {time}
                                 </div>
@@ -864,36 +940,65 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                             <div className='flex flex-row'>
                               <div className='flex flex-col ml-2 my-1 rounded-md bg-cyan-200'>
                                 {text.replyid !== '' && texts.has(parseInt(text.replyid)) ? (
-                                  <div className='mx-2 border-2 border-sky-400 rounded-md shadow-md mt-2 py-1 px-1 w-11/12 text-cyan-950 text-lg bg-white'>
+                                  <div className='mx-2 border-2 border-sky-400 rounded-md shadow-md mt-2 py-1 w-11/12 px-1 text-cyan-950 text-lg bg-white'>
+                                    {console.log(texts.get(parseInt(text.replyid)).post_id)}
+                                    {console.log(posts)}
+                                    {console.log(
+                                      posts.get(texts.get(parseInt(text.replyid)).post_id),
+                                    )}
+                                    {texts.get(parseInt(text.replyid)).post_id > 0 &&
+                                      posts.size > 0 && (
+                                        <PostDisplay
+                                          post={posts.get(
+                                            texts.get(parseInt(text.replyid)).post_id,
+                                          )}
+                                        ></PostDisplay>
+                                      )}
+                                    {texts.get(parseInt(text.replyid)).image_path !== '' && (
+                                      <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
+                                        <img
+                                          src={`data:image/png;base64,${
+                                            texts.get(parseInt(text.replyid)).image_path
+                                          }`}
+                                          className='w-64 h-64'
+                                        />
+                                      </div>
+                                    )}
                                     {texts.get(parseInt(text.replyid)).message}
                                   </div>
                                 ) : (
                                   <div></div>
                                 )}
                                 <div className='flex flex-row'>
-                                  {text.post_id > 0 ? (
-                                    <div
-                                      className={`rounded w-[120%] px-3 pb-2 pt-3 mb-1 pr-12 -mr-1.5 text-lg text-white`}
-                                    >
-                                      {posts.get(text.post_id) && (
-                                        <PostDisplay post={posts.get(text.post_id)}></PostDisplay>
-                                      )}
-                                    </div>
-                                  ) : text.image_path !== null ? (
-                                    <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1 '>
-                                      <img
-                                        src={`data:image/png;base64,${text.image_path}`}
-                                        className='w-64 h-64'
-                                      ></img>
-                                    </div>
-                                  ) : (
-                                    // If neither text.post_id nor text.image_path conditions are met
-                                    <div
-                                      className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5 text-lg text-cyan-950`}
-                                    >
-                                      {text.message}
-                                    </div>
-                                  )}
+                                  <div
+                                    className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5 text-lg ${
+                                      isCurrentUser ? 'text-white' : 'text-cyan-950'
+                                    }`}
+                                    style={{
+                                      width:
+                                        text.post_id > 0 || text.image_path !== ''
+                                          ? 'calc(100% - 64px)'
+                                          : 'auto',
+                                    }}
+                                  >
+                                    {text.post_id > 0 ? (
+                                      <div className='rounded w-[150%] px-3 pb-2 pt-3 mb-1 pr-12 -mr-1.5 text-white'>
+                                        {posts.get(text.post_id) && posts.size > 0 && (
+                                          <PostDisplay post={posts.get(text.post_id)} />
+                                        )}
+                                      </div>
+                                    ) : text.image_path !== '' ? (
+                                      <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
+                                        <img
+                                          src={`data:image/png;base64,${text.image_path}`}
+                                          className='w-64 h-64'
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div>{text.message}</div>
+                                    )}
+                                  </div>
+
                                   <div className='flex flex-col items-end mr-auto h-[44px] w-[80px] rounded justify-between'>
                                     <img
                                       src={more1}
@@ -904,12 +1009,12 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                                       className='w-4 h-4 mt-1 mr-2'
                                       alt='more'
                                     ></img>
-                                    {!text.post_id > 0 && text.image_path === null && (
+                                    {!text.post_id > 0 && text.image_path === '' && (
                                       <div className='text-sm text-gray-400 w-16 mb-1 '>{time}</div>
                                     )}
                                   </div>
                                 </div>
-                                {(text.post_id > 0 || text.image_path !== null) && (
+                                {(text.post_id > 0 || text.image_path !== '') && (
                                   <div className='text-sm ml-3 -mt-1.5 text-gray-500 w-16 mb-1 '>
                                     {time}
                                   </div>
@@ -958,7 +1063,6 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         <div className='w-full bg-gray-300 h-[1px]'></div>
         {console.log(texts.get(reply))}
         {reply !== -1 && (
-          // <div className='fixed bottom-16 '>{texts.get(reply).message}</div>
           <div className='flex flex-row fixed bottom-16 left-92 w-8/12 ml-28'>
             <img
               src={remove}
@@ -967,10 +1071,12 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
               }}
               className='absolute -right-1 -top-3 h-6 w-6'
             ></img>
-            <div
-              className={`w-full py-2 rounded-md p-1 border-2 bg-cyan-600 text-white border-cyan-900 shadow-sm`}
-            >
-              {texts.get(reply).message}
+            <div className='flex justify-start w-full py-2 rounded-md p-1 border-2 bg-cyan-600 text-white border-cyan-900 shadow-sm'>
+              <div className={``}>{texts.get(reply).message}</div>
+              {texts.get(reply).image_path !== '' && (
+                <img src={image_icon} className='w-8 h-8'></img>
+              )}
+              {texts.get(reply).post_id !== -1 && <div className=''>Replying to the post</div>}
             </div>
           </div>
         )}
@@ -1010,6 +1116,10 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                   <div className='flex w-full items-center'>
                     <input
                       type='text'
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyPress}
+                      ref={inputRef}
+                      value={message}
                       className='w-[100%] outline-none mt-4 text-lg p-1 rounded-md border-2 border-orange-300 shadow-md'
                     ></input>
                     <IoSend

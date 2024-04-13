@@ -338,7 +338,7 @@ const Posts = ({ image, username1 }) => {
   }, []);
 
   return (
-    <div className='flex flex-col w-[90%] md:mr-0 lg:-mt-0 md:-mt-0 lg:mr-0 md:w-[90%] lg:w-[80%] md: lg:-ml-0'>
+    <div className='flex flex-col w-[90%] md:mr-0 lg:-mt-0 md:-mt-0 lg:mr-0 md:w-[90%] lg:w-[75%] md: lg:-ml-0'>
       {posts &&
         posts.map((post, idx) => {
           return (

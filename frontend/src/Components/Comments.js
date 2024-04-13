@@ -315,14 +315,14 @@ const Comments = ({ id, comments1 }) => {
   useEffect(() => {
     getusernameofpost();
   }, [username]);
-  useEffect(() => {
-    try {
-      socket.connect();
-      socket.emit('newUser', username);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     socket.connect();
+  //     socket.emit('newUser', username);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }, []);
 
   return (
     <div className='flex flex-col w-full h-full overflow-y-scroll'>
