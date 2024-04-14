@@ -1382,7 +1382,7 @@ app.put('/deletepost', async (req, res) => {
   try {
     const { id } = req.body;
     const response1 = await pool.query('DELETE FROM post WHERE id=$1', [id]);
-    const response2 = await pool.query('DELETE * FROM messages WHERE post_id=$1', [id]);
+    const response2 = await pool.query('DELETE FROM messages WHERE post_id=$1', [id]);
     res.json({ message: 'ok' });
     res.json({ success: true });
   } catch (err) {
@@ -1935,10 +1935,10 @@ app.put('/handlecommentlikes', async (req, res) => {
       res.json({ success: false, user: response.rows[0].person2 });
     } else {
       // If the user hasn't liked the post, insert the like
-      await pool.query('INSERT INTO comment_like (username,comment_id) VALUES ($1,$2)', [
-        username,
-        id,
-      ]);
+      const response = await pool.query(
+        'INSERT INTO comment_like (username,comment_id) VALUES ($1,$2) RETURNING id',
+        [username, id],
+      );
 
       // Get the username of the post owner
       const postOwnerResponse = await pool.query(
@@ -1953,8 +1953,9 @@ app.put('/handlecommentlikes', async (req, res) => {
         'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2) VALUES($1,$2,$3,$4,$5,$6)',
         [username, postOwner, 'commentlike', id, 'yes', 'no'],
       );
-
-      res.json({ success: true });
+      console.log('Like id recieved');
+      console.log(response.rows[0].id);
+      res.json({ success: true, idx: response.rows[0].id });
     }
   } catch (err) {
     console.error(err.message);
@@ -2143,6 +2144,15 @@ app.put('/fetchprofile', async (req, res) => {
       response.rows[0].profile = base64Image;
       res.json({ data: response.rows[0] });
     });
+  } catch (err) {
+    console.log(err.message);
+  }
+});
+app.put('/fetchcommentlikes', async (req, res) => {
+  try {
+    const { id } = req.body;
+    const response = await pool.query('SELECT * FROM comment_like WHERE comment_id=$1', [id]);
+    res.json({ data: response.rows });
   } catch (err) {
     console.log(err.message);
   }

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIndex } from './IndexContext';
-
+import remove from '../Images/remove.png';
 function Following() {
   const navigate1 = useNavigate();
   const { username } = useIndex();
   const [following, setFollowing] = useState([]);
   const [filteredFollowing, setFilteredFollowing] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [confirm, setConfirm] = useState(false);
   const navigatetoprofile1 = (state) => {
     const user2 = state.usernames;
     if (user2[0] === username) {
@@ -96,13 +96,52 @@ function Following() {
               <div className='text-lg py-3'>{follower.person1}</div>
             </div>
             <button
-              onClick={async () => {
-                await removeAsFollower(follower.person1);
+              onClick={() => {
+                setConfirm(true);
               }}
               className='text-cyan-950 border-2 border-sky-300 w-40 mt-1 md:h-[45px] lg:h-[45px] h-10 bg-orange-100 text-sm rounded-lg'
             >
               Remove As A Follower
             </button>
+            {confirm && (
+              <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
+                <div className='flex flex-col absolute w-1/4 border-2 rounded-md items-center justify-center space-y-8 border-cyan-600 h-1/3 text-center text-cyan-950 bg-cyan-50'>
+                  <div className='text-4xl'>Remove Follower</div>
+                  <div className='text-sm mx-9'>
+                    Confirm removal of{' '}
+                    <span className='text-lg font-semibold'>{follower.person1}</span> as your
+                    follower? No notification will be sent.
+                  </div>
+
+                  <div className='flex w-full justify-around'>
+                    <div
+                      onClick={async () => {
+                        await removeAsFollower(follower.person1);
+                        setConfirm(false);
+                      }}
+                      className='bg-cyan-900 text-white w-1/3 py-1 rounded-md cursor-pointer shadow-2xl border-2 border-cyan-400'
+                    >
+                      Yes
+                    </div>
+                    <div
+                      onClick={() => {
+                        setConfirm(false);
+                      }}
+                      className='bg-cyan-900 text-white w-1/3 py-1 rounded-md cursor-pointer shadow-2xl border-2 border-cyan-400'
+                    >
+                      No
+                    </div>
+                  </div>
+                  <img
+                    src={remove}
+                    className='w-6 h-6 absolute -right-3 -top-11'
+                    onClick={() => {
+                      setConfirm(false);
+                    }}
+                  ></img>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

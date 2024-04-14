@@ -5,6 +5,7 @@ import { useIndex } from './IndexContext';
 import { useMemo } from 'react';
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
+  // var notifications=[];
   const [reqsent, setReqsent] = useState(true);
   const navigate = useNavigate();
   const { username } = useIndex();
@@ -65,7 +66,7 @@ function Notifications() {
       });
       console.log(response);
       await response.json();
-      await fetchNotifications();
+      // await fetchNotifications();
       if (!response.ok) {
         throw new Error(`API request failed with status: ${response.status}`);
       }
@@ -120,20 +121,48 @@ function Notifications() {
   };
 
   // Add useMemo to memoize the function
-  const handleAcceptClick = useMemo(
-    () => async (notification) => {
-      try {
-        setReqsent(false);
-        await deleteRequest1(notification);
-        await socket.emit('notif', notification.person1);
-      } catch (err) {
-        console.error(err.message);
-      }
-    },
-    [], // Ensure this function is memoized only once
-  );
+  // const handleAcceptClick = useMemo(
+  //   () => async (notification) => {
+  //     try {
 
-  // Add useMemo to memoize the function
+  //       await deleteRequest1(notification);
+  //       await socket.emit('notif', notification.person1);
+  //     } catch (err) {
+  //       console.error(err.message);
+  //     }
+  //   },
+  //   [], // Ensure this function is memoized only once
+  // );
+  const handleAcceptClick = async (notificationToUpdate) => {
+    try {
+      // Filter out the notification that has been accepted
+      console.log(notifications);
+      console.log(notificationToUpdate);
+      const updatedNotifications = notifications.map((notification) => {
+        if (
+          notification.person1 === notificationToUpdate.person1 &&
+          notification.id === 'follow' &&
+          notificationToUpdate.id === 'follow'
+        ) {
+          return { ...notification, id: 'following' };
+        }
+        return notification;
+      });
+      console.log(updatedNotifications);
+      // await Promise.all([
+      //   deleteRequest1(notificationToUpdate),
+      //   socket.emit('notif', notificationToUpdate.person1),
+      // ]);
+      // // Set the updated notifications state
+      setNotifications([...updatedNotifications]);
+      // // notifications=[...updatedNotifications];
+
+      // // Make API calls or emit socket events
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
       const body = { username };
@@ -147,10 +176,11 @@ function Notifications() {
         throw new Error(`API request failed with status: ${response.status}`);
       }
       const responseData = await response.json();
-      // console.log(responseData);
-      // console.log(updatedNotifications);
+      console.log(responseData);
+      // console.log(updatedNotificat);
       setNotifications([]);
       setNotifications(responseData);
+      // notifications=responseData
     } catch (err) {
       console.error(err.message);
     }
@@ -159,7 +189,9 @@ function Notifications() {
   useEffect(() => {
     fetchNotifications();
   }, [username]);
-
+  useEffect(()=>{
+    console.log(notifications);
+  },[notifications])
   return (
     <div
       className={`lg:h-[85%] h-[85%] space-y-4 ml-2 w-[94%] lg:w-[87.5%] mt-4 rounded-md mr-2.5`}
@@ -168,11 +200,12 @@ function Notifications() {
         className='flex flex-col flex-col-wrap lg:h-full md:h-full overflow-y-scroll space-y-2 '
         style={{ height: 'auto', maxHeight: '100%' }}
       >
+        {console.log(notifications)}
         {notifications.map((notification) => {
           if (notification.person1 === username && notification.id === 'following') {
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 onClick={() =>
                   navigateToProfile({
                     usernames: [notification.person2, notification.person1],
@@ -198,7 +231,7 @@ function Notifications() {
             // if (reqsent) {
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
               >
                 <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
@@ -227,7 +260,7 @@ function Notifications() {
             console.log(notification);
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 onClick={() =>
                   navigateToProfile({
                     usernames: [notification.person1, notification.person2],
@@ -255,7 +288,7 @@ function Notifications() {
             // console.log(notification)
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 onClick={() =>
                   navigateToProfile({
                     usernames: [notification.person1, notification.person2],
@@ -282,7 +315,7 @@ function Notifications() {
           } else if (notification.person2 === username && notification.id === 'comment') {
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 onClick={() =>
                   navigateToProfile({
                     usernames: [notification.person1, notification.person2],
@@ -310,7 +343,7 @@ function Notifications() {
             // console.log(notification)
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 onClick={() =>
                   navigateToProfile({
                     usernames: [notification.person1, notification.person2],
@@ -338,7 +371,7 @@ function Notifications() {
             // console.log(notification)
             return (
               <div
-                key={notification.id} // Ensure each element has a unique key
+                // key={notification.id} // Ensure each element has a unique key
                 onClick={() =>
                   navigateToProfile({
                     usernames: [notification.person1, notification.person2],

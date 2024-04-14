@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const Users = ({ list }) => {
   const [updatedList, setUpdatedList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
+  // console.log(list);
   // Function to handle changes in the search input
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);

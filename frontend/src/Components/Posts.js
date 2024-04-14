@@ -54,6 +54,7 @@ const Posts = ({ image, username1 }) => {
   const { username } = useIndex();
   const { edit, updateEdit } = useIndex();
   const [displayLikes, setDisplayLikes] = useState(-1);
+  const [confirm,setConfirm]=useState(-1);
   console.log(username1);
   console.log(username);
   useEffect(() => {
@@ -367,12 +368,50 @@ const Posts = ({ image, username1 }) => {
                     ) : (
                       <button
                         onClick={() => {
-                          DeletePost(post.id);
+                          // DeletePost(post.id);
+                          setConfirm(post.id);
                         }}
                         className='bg-sky-700 cursor-pointer border-2 border-orange-200 shadow-xl rounded-md py-2 w-20'
                       >
                         Delete
                       </button>
+                    )}
+                    {confirm===post.id && (
+                      <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
+                        <div className='flex flex-col absolute w-1/4 border-2 rounded-md items-center justify-center space-y-8 border-cyan-600 h-1/3 text-center text-cyan-950 bg-cyan-50'>
+                          <div className='text-4xl'>Delete Post</div>
+                          <div className='text-sm mx-9'>
+                            Are you sure you want to delete this post?
+                          </div>
+                          {console.log(post.id)}
+                          <div className='flex w-full justify-around'>
+                            <div
+                              onClick={async () => {
+                                await DeletePost(post.id);
+                                setConfirm(-1);
+                              }}
+                              className='bg-cyan-900 text-white w-1/3 py-1 rounded-md cursor-pointer shadow-2xl border-2 border-cyan-400'
+                            >
+                              Yes
+                            </div>
+                            <div
+                              onClick={() => {
+                                setConfirm(-1);
+                              }}
+                              className='bg-cyan-900 text-white w-1/3 py-1 rounded-md cursor-pointer shadow-2xl border-2 border-cyan-400'
+                            >
+                              No
+                            </div>
+                          </div>
+                          <img
+                            src={remove}
+                            className='w-6 h-6 absolute -right-3 -top-11'
+                            onClick={() => {
+                              setConfirm(-1);
+                            }}
+                          ></img>
+                        </div>
+                      </div>
                     )}
                     <div>
                       {isSmallScreen ? (

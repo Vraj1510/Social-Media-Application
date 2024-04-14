@@ -112,7 +112,7 @@ function DashBoard() {
       ) : (
         isLargeScreen && <DashBoardPosts username={username}></DashBoardPosts>
       )}
-      {isLargeScreen && <PYMK username={username}></PYMK>}
+      {isLargeScreen && username && <PYMK username={username}></PYMK>}
       {isSmallScreen && <Sidebar username={username} index={0}></Sidebar>}
     </div>
   );

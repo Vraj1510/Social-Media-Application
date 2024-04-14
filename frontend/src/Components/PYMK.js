@@ -8,7 +8,7 @@ const PYMK = ({ username }) => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [bool1, setBool1] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
+  console.log(username);
   useEffect(() => {
     socket.connect();
     socket.on('notifCount', async (count) => {
@@ -49,16 +49,20 @@ const PYMK = ({ username }) => {
       };
       const response = await fetch('http://localhost:3001/getrequests', requestOptions);
       const result = await response.json();
-
+      console.log(result.data);
+      console.log(users);
       if (result && result.data) {
         const updatedBool1 = new Array(users.length).fill(false);
         users.forEach((user, idx) => {
-          if (result.data.find((item) => item.person2 === user.username)) {
+          if (result.data.find((item) => item.person2 === user.person1)) {
+            console.log("GETTING HERE");
+            console.log(idx);
             updatedBool1[idx] = true;
           }
         });
         setBool1(updatedBool1);
       }
+      console.log(bool1);
     } catch (error) {
       console.error('Error fetching requests:', error);
     }
@@ -139,7 +143,7 @@ const PYMK = ({ username }) => {
 
   useEffect(() => {
     fetchPeople();
-  }, [username]);
+  }, []);
 
   useEffect(() => {
     setBool1(new Array(users.length).fill(false));

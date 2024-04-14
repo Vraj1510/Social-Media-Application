@@ -11,94 +11,11 @@ import { useIndex } from './IndexContext';
 import EmojiPicker from 'emoji-picker-react';
 import RoundedBtn from './RoundButton';
 import { BiHappy } from 'react-icons/bi';
-const buildTree = (comments) => {
-  const commentMap = new Map();
-  comments.forEach((comment) => {
-    const replyId = comment.reply_id;
-    if (!commentMap.has(replyId)) {
-      commentMap.set(replyId, []);
-    }
-    commentMap.get(replyId).push(comment);
-  });
-  const buildSubtree = (commentId) => {
-    const children = commentMap.get(commentId) || [];
-    children.forEach((child) => {
-      child.children = buildSubtree(child.comment_id);
-    });
 
-    return children;
-  };
-  const rootNodes = buildSubtree(-1);
-
-  return rootNodes;
-};
-const Commentdis = ({ comments }) => {
-  const arr1 = [];
-  const map = new Map();
-  const filteredComments = comments.filter((comment) => comment.reply_id === -1);
-  filteredComments.sort((a, b) => {
-    const dateA = new Date(`${a.year}-${a.month}-${a.date}`);
-    const dateB = new Date(`${b.year}-${b.month}-${b.date}`);
-
-    if (dateB.getTime() !== dateA.getTime()) {
-      return dateB.getTime() - dateA.getTime(); // Sort by date if dates are different
-    } else {
-      const timeA = parseInt(a.hour) * 60 + parseInt(a.minutes);
-      const timeB = parseInt(b.hour) * 60 + parseInt(b.minutes);
-      return timeB - timeA;
-    }
-  });
-  const tree = buildTree(comments);
-  const performDFS = (node) => {
-    if (!node) return;
-    arr1.push(node);
-    node.children.forEach((child) => {
-      performDFS(child);
-    });
-  };
-  tree.forEach((rootNode) => {
-    performDFS(rootNode);
-    // console.log(arr1);
-  });
-  return arr1;
-};
-const getTimeDifference = (comment) => {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth(); // Months are zero-based, so we add 1 to get the correct month
-  const currentDay = new Date().getDate();
-  const currentHour = new Date().getHours();
-  const currentMinutes = new Date().getMinutes();
-  const commentYear = parseInt(comment.year);
-  const commentMonth = parseInt(comment.month);
-  const commentDay = parseInt(comment.date);
-  const commentHour = parseInt(comment.hour);
-  const commentMinutes = parseInt(comment.minutes);
-
-  const yearsDifference = currentYear - commentYear;
-  const monthsDifference = currentMonth - commentMonth;
-  const daysDifference = currentDay - commentDay;
-  const hoursDifference = currentHour - commentHour;
-  const minutesDifference = currentMinutes - commentMinutes;
-
-  if (yearsDifference > 0) {
-    return yearsDifference + 'y';
-  } else if (monthsDifference > 0) {
-    return monthsDifference + 'm';
-  } else if (daysDifference >= 7) {
-    return Math.floor(daysDifference / 7) + 'w';
-  } else if (daysDifference > 0) {
-    return daysDifference + 'd';
-  } else if (hoursDifference > 0) {
-    return hoursDifference + 'h';
-  } else if (minutesDifference > 0) {
-    return minutesDifference + 'm';
-  } else {
-    return 'Just now';
-  }
-};
 const Comments = ({ id, comments1 }) => {
   const [commentdisplay, setcommentdisplay] = useState([]);
   const [map, setMap] = useState(new Map());
+  const [map1, setMap1] = useState(new Map());
   const [replyid, setReplyId] = useState(-1);
   const [replycomment, setReplyComment] = useState([]);
   const [value, setValue] = useState('');
@@ -202,37 +119,104 @@ const Comments = ({ id, comments1 }) => {
       return 0;
     }
   };
-  const fetchcomment = async (id) => {
+  const fetchProfileImage = async (username1) => {
     try {
-      var myHeaders = new Headers();
-      myHeaders.append('Content-Type', 'application/json');
-
-      var raw = JSON.stringify({
-        id,
+      const body = { username1 };
+      const response = await fetch('http://localhost:3001/fetchImage', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+      return `data:image/png;base64,${result.imageContent}`;
+    } catch (err) {
+      console.error('Error fetching image:', err.message);
+    }
+  };
+  const buildTree = (comments) => {
+    const commentMap = new Map();
+    comments.forEach((comment) => {
+      const replyId = comment.reply_id;
+      if (!commentMap.has(replyId)) {
+        commentMap.set(replyId, []);
+      }
+      commentMap.get(replyId).push(comment);
+    });
+    const buildSubtree = (commentId) => {
+      const children = commentMap.get(commentId) || [];
+      children.forEach((child) => {
+        child.children = buildSubtree(child.comment_id);
       });
 
-      var requestOptions = {
-        method: 'PUT',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow',
-      };
+      return children;
+    };
+    const rootNodes = buildSubtree(-1);
 
-      const response = await fetch('http://localhost:3001/fetchcomment', requestOptions);
-      const result = await response.json();
-      console.log(result.data);
-      setcomments([...result.data]);
-      map.clear();
-      result.data &&
-        result.data.map((comment1) => {
-          map.set(comment1.comment_id, comment1);
-        });
-      const arr = Commentdis({ comments: result.data });
-      setcommentdisplay(arr);
-      // return result.data.length;
-    } catch (err) {
-      console.log(err.message);
-      return 0;
+    return rootNodes;
+  };
+
+  const Commentdis = async () => {
+    const arr1 = [];
+    const map = new Map();
+    const filteredComments = commentsWithProfile.filter((comment) => comment.reply_id === -1);
+    filteredComments.sort((a, b) => {
+      const dateA = new Date(`${a.year}-${a.month}-${a.date}`);
+      const dateB = new Date(`${b.year}-${b.month}-${b.date}`);
+
+      if (dateB.getTime() !== dateA.getTime()) {
+        return dateB.getTime() - dateA.getTime(); // Sort by date if dates are different
+      } else {
+        const timeA = parseInt(a.hour) * 60 + parseInt(a.minutes);
+        const timeB = parseInt(b.hour) * 60 + parseInt(b.minutes);
+        return timeB - timeA;
+      }
+    });
+    const tree = buildTree(commentsWithProfile);
+    const performDFS = (node) => {
+      if (!node) return;
+      arr1.push(node);
+      node.children.forEach((child) => {
+        performDFS(child);
+      });
+    };
+    tree.forEach((rootNode) => {
+      performDFS(rootNode);
+    });
+    console.log(arr1);
+    return arr1;
+  };
+  const getTimeDifference = (comment) => {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth(); // Months are zero-based, so we add 1 to get the correct month
+    const currentDay = new Date().getDate();
+    const currentHour = new Date().getHours();
+    const currentMinutes = new Date().getMinutes();
+    const commentYear = parseInt(comment.year);
+    const commentMonth = parseInt(comment.month);
+    const commentDay = parseInt(comment.date);
+    const commentHour = parseInt(comment.hour);
+    const commentMinutes = parseInt(comment.minutes);
+
+    const yearsDifference = currentYear - commentYear;
+    const monthsDifference = currentMonth - commentMonth;
+    const daysDifference = currentDay - commentDay;
+    const hoursDifference = currentHour - commentHour;
+    const minutesDifference = currentMinutes - commentMinutes;
+
+    if (yearsDifference > 0) {
+      return yearsDifference + 'y';
+    } else if (monthsDifference > 0) {
+      return monthsDifference + 'M';
+    } else if (daysDifference >= 7) {
+      return Math.floor(daysDifference / 7) + 'w';
+    } else if (daysDifference > 0) {
+      return daysDifference + 'd';
+    } else if (hoursDifference > 0) {
+      return hoursDifference + 'h';
+    } else if (minutesDifference > 0) {
+      return minutesDifference + 'm';
+    } else {
+      return 'Just now';
     }
   };
   const deletecomment = async (id1) => {
@@ -280,56 +264,71 @@ const Comments = ({ id, comments1 }) => {
     setReplyId(id);
     console.log(replycomment);
   };
-  useEffect(() => {
-    map.clear();
-    // console.log('comments chane')
-    comments.map((comment1) => {
-      map.set(comment1.comment_id, comment1);
-    });
-    const arr = Commentdis({ comments: comments });
-    console.log(arr);
-    setcommentdisplay(arr);
-    console.log(commentdisplay);
-  }, [comments]);
   // useEffect(() => {
-  //   try {
-  //     socket.connect();
-  //     socket.on('commented', async () => {
-  //       console.log('commentrecievd');
-  //       await fetchcomment(id);
-  //     });
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }, []);
+  //   map.clear();
+
+  //   comments.map((comment1) => {
+  //     map.set(comment1.comment_id, comment1);
+  //   });
+  //   const arr = Commentdis({ comments: comments });
+  //   console.log(arr);
+  //   setcommentdisplay(arr);
+  //   console.log(commentdisplay);
+  // }, [comments]);
   useEffect(() => {
     map.clear();
-    comments &&
-      comments.map((comment1) => {
-        map.set(comment1.comment_id, comment1);
-      });
-    setcomments(comments1);
-    const arr = Commentdis({ comments });
-    setcommentdisplay(arr);
+    const fetchData = async () => {
+      const updatedComments = await Promise.all(
+        comments.map(async (comment1) => {
+          const profile = await fetchProfileImage(comment1.username);
+          return { ...comment1, profile };
+        }),
+      );
+      setCommentsWithProfile(updatedComments);
+    };
+
+    fetchData();
   }, [username]);
   useEffect(() => {
     getusernameofpost();
   }, [username]);
-  // useEffect(() => {
-  //   try {
-  //     socket.connect();
-  //     socket.emit('newUser', username);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }, []);
+  const [commentsWithProfile, setCommentsWithProfile] = useState([]);
+
+  useEffect(() => {
+    map.clear();
+    const fetchData = async () => {
+      const updatedComments = await Promise.all(
+        comments.map(async (comment1) => {
+          const profile = await fetchProfileImage(comment1.username);
+          return { ...comment1, profile };
+        }),
+      );
+      setCommentsWithProfile(updatedComments);
+    };
+
+    fetchData();
+  }, [comments]);
+  useEffect(() => {
+    commentsWithProfile.map((comment1) => {
+      map.set(comment1.comment_id, comment1);
+    });
+  }, [commentsWithProfile]);
+  useEffect(() => {
+    map.clear();
+    Commentdis().then((arr) => {
+      console.log(arr);
+      setcommentdisplay(arr);
+      console.log(commentdisplay);
+    });
+  }, [commentsWithProfile]);
 
   return (
     <div className='flex flex-col w-full h-full overflow-y-scroll'>
       <div className='text-2xl font-medium'>Comments</div>
       <div className='w-full h-[2px] bg-gray-200 my-2'></div>
       <div className='w-full h-[90%]'>
-        {commentdisplay &&
+        {console.log(commentdisplay)}
+        {commentdisplay.length > 0 &&
           commentdisplay.map((comment2) =>
             comment2.reply_id !== -1 ? (
               <div
@@ -344,7 +343,12 @@ const Comments = ({ id, comments1 }) => {
                   <div className='flex flex-col'>
                     <div className='flex flex-row items-center space-x-8 justify-between'>
                       <div className='flex flex-row items-center space-x-1'>
-                        <img src={profile} className='h-12 w-12' alt='Profile'></img>
+                        {/* {await fetchProfileImage(comment2.user_name)} */}
+                        {/* <img
+                          src={`data:image/png;base64,${comment2.profile}`}
+                          className='h-12 w-12'
+                          alt='Profile'
+                        ></img> */}
                         <div className='text-xl font-medium'>{comment2.username}</div>
                         <div className='text-sm font-regular text-gray-500'>
                           {getTimeDifference(comment2)}
@@ -387,7 +391,11 @@ const Comments = ({ id, comments1 }) => {
                       onClick={() => scrollToComment(comment2.reply_id)}
                     >
                       <div className='flex items-center space-x-2 max-w-5/6 p-1'>
-                        <img src={profile} className='h-10 w-10' alt='Profile'></img>
+                        {/* <img
+                          src={`data:image/png;base64,${comment2.profile}`}
+                          className='h-10 w-10'
+                          alt='Profile'
+                        ></img> */}
                         <div className='flex flex-col'>
                           <div className='flex flex-row items-center justify-between'>
                             <div className='flex flex-row items-center space-x-1'>
@@ -420,7 +428,7 @@ const Comments = ({ id, comments1 }) => {
                 style={{ width: 'max-content' }}
               >
                 <div className='flex items-center space-x-2 max-w-5/6 p-1'>
-                  <img src={profile} className='h-12 w-12' alt='Profile'></img>
+                  <img src={comment2.profile} className='h-12 w-12' alt='Profile'></img>
                   <div className='flex flex-col'>
                     <div className='flex flex-row items-center space-x-8 justify-between'>
                       <div className='flex flex-row items-center space-x-1'>
@@ -483,7 +491,7 @@ const Comments = ({ id, comments1 }) => {
                 // style={{ width: 'max-content' }}
               >
                 <div className='flex items-center space-x-2 max-w-5/6 p-1'>
-                  <img src={profile} className='h-12 w-12'></img>
+                  <img src={replycomment[0].profile} className='h-12 w-12'></img>
                   <div className='flex flex-col'>
                     <div className='flex flex-row items-center space-x-8 justify-between'>
                       <div className='flex flex-row items-center space-x-1'>
