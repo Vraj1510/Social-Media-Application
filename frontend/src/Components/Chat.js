@@ -13,24 +13,26 @@ import EmojiPicker from 'emoji-picker-react';
 import { socket } from './DashBoard';
 import logout1 from '../Images/logout.png';
 import PostDisplay from './PostDisplay';
+import { useIndex } from './IndexContext';
+import PostDisplay1 from './PostDisplay1';
 // const socket = io.connect('http://localhost:3001');
 
 const Chat = ({ username, chats, index1, onlineUsers1 }) => {
   const monthdata = [
-    'January',
-    'February',
-    'March',
-    'April',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
     'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
-  const daydata = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const daydata = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
   const inputRef = useRef(null);
   const fileInput = useRef(null);
   const [imagetext, setImageText] = useState(false);
@@ -52,6 +54,8 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
   const [edit, setedit] = useState(-1);
   const [edited, setedited] = useState('');
   const [posts, mapPosts] = useState(new Map());
+
+  const { updateIndex1 } = useIndex();
   var map1 = new Map();
   console.log(chats);
   console.log(onlineUsers1);
@@ -488,6 +492,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
   // }, []);
   useEffect(() => {
     setOnlineUsers(onlineUsers1);
+    console.log(onlineUsers1);
   }, [onlineUsers1, index1]);
 
   useEffect(() => {
@@ -590,7 +595,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
   }, [index1, chats]);
   if (index1 === -1) {
     return (
-      <div className='flex w-full h-full bg-orange-50 justify-around items-center'>
+      <div className='flex w-full h-full bg-cyan-50 justify-around items-center'>
         <div className='text-4xl text-cyan-950'>Start A Conversation!</div>
       </div>
     );
@@ -598,30 +603,47 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
     joinRoom();
     return (
       <div className='w-full h-screen'>
-        <div className='flex items-center justify-between px-2 bg-stone-50'>
+        <div className='flex items-center py-2 justify-between px-2 bg-stone-100'>
           <div className='flex flex-row space-x-3 items-center'>
             {isSmallScreen && (
-              <img
-                src={logout1}
-                className='h-12 bg-white border-2 border-sky-300 shadow-lg w-12'
-              ></img>
+              // <img
+              //   src={logout1}
+              //   className='h-12 bg-white border-2 border-sky-300 shadow-lg w-12'
+              // ></img>
+              <button
+                onClick={() => {
+                  updateIndex1(-1);
+                }}
+                class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 w-10'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  stroke-width='2'
+                  stroke-linecap='round'
+                  stroke-linejoin='round'
+                  class='w-7 h-7'
+                >
+                  <path d='m15 18-6-6 6-6'></path>
+                </svg>
+              </button>
             )}
             <img
               src={`data:image/png;base64,${chats[index1].profile}`}
-              className='h-[50px] w-[50px] rounded-full'
+              className='h-[40px] w-[40px] rounded-full'
             ></img>
-            <div className='text-3xl'>{chats[index1].username}</div>
+            <div className='text-2xl'>{chats[index1].username}</div>
             {onlineUsers.some((user) => user.username === chats[index1].username) ? (
               <div>Online</div>
             ) : null}
           </div>
-          <div className='flex flex-row space-x-3 p-3 items-center'>
-            <img src={phone} className='h-[30px] w-[30px] rounded-full'></img>
-            <img src={zoom} className='h-[40px] w-[40px] rounded-full'></img>
-          </div>
         </div>
         <div className='w-full bg-gray-300 h-[2px]'></div>
-        <div className='p-1 h-[83.5%] bg-orange-50 overflow-y-scroll'>
+        <div className='p-1 bg-custom-image h-[85%] bg-cyan-50 overflow-y-scroll'>
           {console.log(messagesByDay)}
           {Array.from(messagesByDay).map(([key, value]) => {
             const arr1 = key.split('-');
@@ -646,22 +668,10 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                   }
                 }
               } else {
-                time1 =
-                  arr1[2] +
-                  ' ' +
-                  monthdata[parseInt(arr1[1], 10)] +
-                  ' ' +
-                  daydata[parseInt(arr1[3], 10)];
+                time1 = arr1[2] + '/' + (parseInt(arr1[1], 10) + 1) + '/' + arr1[0];
               }
             } else {
-              time1 =
-                arr1[2] +
-                '-' +
-                (parseInt(arr1[1], 10) + 1) +
-                '-' +
-                arr1[0] +
-                ' ' +
-                daydata[parseInt(arr1[3], 10)];
+              time1 = arr1[2] + '/' + (parseInt(arr1[1], 10) + 1) + '/' + arr1[0];
             }
             value.sort((a, b) => {
               // Convert hours and minutes to numbers
@@ -688,10 +698,12 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                 {console.log(value)}
                 {/* backend/newImages */}
                 {value.length > 0 && (
-                  <div className='flex flex-row items-center justify-between'>
-                    <div className='flex-grow h-[1px] bg-gradient-to-r from-transparent to-cyan-950'></div>
-                    <div className='z-10 text-cyan-950 text-lg p-3'>{time1}</div>
-                    <div className='flex-grow h-[1px] bg-gradient-to-r from-cyan-950 to-transparent'></div>
+                  <div className='flex flex-row items-center w-full justify-around'>
+                    {/* //   <div className='flex-grow h-[1px] bg-gradient-to-r from-transparent to-cyan-950'></div> */}
+                    <div className='z-10 text-cyan-950 bg-cyan-100 px-3 py-1.5 my-2 rounded-lg'>
+                      {time1}
+                    </div>
+                    {/* //   <div className='flex-grow h-[1px] bg-gradient-to-r from-cyan-950 to-transparent'></div> */}
                   </div>
                 )}
                 {/* backend/newImages/airobot.png */}
@@ -702,13 +714,9 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                   const time = hour12 + ':' + minutes1 + ' ' + text.ampm;
                   return (
                     <div key={index} className='flex flex-row w-full items-center'>
-                      {/* {console.log(text)}
-                      {console.log(!isCurrentUser)}
-                      {console.log(text.seen2 === 'no')}
-                      {console.log(!unseen)} */}
                       {text.id === edit && (
                         <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
-                          <div className='flex flex-col space-y-4 items-start bg-cyan-100 rounded-md py-6 px-5 w-1/3 relative'>
+                          <div className='flex flex-col items-start bg-stone-100 rounded-md py-6 px-5 w-1/3 relative'>
                             <div className='flex flex-col w-full'>
                               <textarea
                                 type='text'
@@ -718,11 +726,11 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                                   setedited(e.target.value);
                                   updateTextareaHeight(e);
                                 }}
-                                className='outline-none px-2 py-1 rounded-md border-2 border-sky-300 w-full'
+                                className='outline-none px-2 py-1 text-md rounded-md border shadow-sm border-gray-300 w-full'
                               ></textarea>
                               <img
                                 src={remove}
-                                className='h-6 w-6 absolute -right-2 -top-2'
+                                className='h-4 w-4 absolute -right-2 -top-2'
                                 onChange={(e) => setedited(e.target.value)}
                                 onClick={() => {
                                   setedit(-1);
@@ -737,7 +745,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                                 console.log(text.id);
                                 await editmessage(text.id, edited);
                               }}
-                              className='bg-gray-200 rounded-md p-1 px-4 shadow-md border-gray-300 border-2'
+                              className='bg-black text-white rounded-md p-1 px-4 -mb-2 mt-4 border-2'
                             >
                               Save
                             </button>
@@ -746,12 +754,12 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                       )}
                       {text.id === delete1 && (
                         <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
-                          <div className='flex flex-row bg-stone-50 rounded-md py-6 px-5 relative'>
+                          <div className='flex flex-row bg-stone-50 rounded-md py-6 px-5 space-x-4 relative'>
                             <button
                               onClick={() => {
                                 deleteforall(text.id);
                               }}
-                              className='text-black drop-shadow-lg border-sky-400 border-2 mx-2 rounded-md p-2 bg-cyan-200'
+                              className=' bg-black text-white rounded-md p-2 px-4'
                             >
                               Delete For All
                             </button>
@@ -759,13 +767,13 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                               onClick={async () => {
                                 await deleteforme(text.id);
                               }}
-                              className='text-black drop-shadow-lg border-sky-400 border-2 rounded-md p-2 bg-cyan-200'
+                              className='bg-black text-white rounded-md p-2 px-4'
                             >
                               Delete For Me
                             </button>
                             <img
                               src={remove}
-                              className='h-6 w-6 absolute -right-2 -top-2'
+                              className='h-5 w-5 absolute -right-2 -top-2'
                               onClick={() => {
                                 setdelete1(-1);
                                 setdelete2(-1);
@@ -799,231 +807,17 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                         </div>
                       )}
                       {!isCurrentUser && text.seen2 === 'no' && !unseen && (
-                        <div className='text-md font-medium'>
-                          {value.length - index} unseen messages
-                        </div>
+                        <div className=' font-medium'>{value.length - index} unseen messages</div>
                       )}
                       {console.log(text)}
                       {/* isCurrentUser text.delete1 should be no, if not text.delete2 should be no*/}
                       {isCurrentUser
                         ? text.delete1 === 'no' && (
-                            <div className='flex flex-col mr-2 rounded-md my-0.5 ml-auto bg-cyan-800'>
-                              {text.replyid !== '' && texts.has(parseInt(text.replyid)) ? (
-                                <div className='mx-2 border-2 border-sky-400 rounded-md shadow-md mt-2 py-1 w-11/12 px-1 text-cyan-950 text-lg bg-white'>
-                                  {console.log(texts.get(parseInt(text.replyid)).post_id)}
-                                  {console.log(posts)}
-                                  {console.log(
-                                    posts.get(texts.get(parseInt(text.replyid)).post_id),
-                                  )}
-                                  {texts.get(parseInt(text.replyid)).post_id > 0 &&
-                                    posts.size > 0 && (
-                                      <PostDisplay
-                                        post={posts.get(texts.get(parseInt(text.replyid)).post_id)}
-                                      ></PostDisplay>
-                                    )}
-                                  {texts.get(parseInt(text.replyid)).image_path !== '' && (
-                                    <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
-                                      <img
-                                        src={`data:image/png;base64,${
-                                          texts.get(parseInt(text.replyid)).image_path
-                                        }`}
-                                        className='w-64 h-64'
-                                      />
-                                    </div>
-                                  )}
-                                  {texts.get(parseInt(text.replyid)).message}
-                                </div>
-                              ) : (
-                                <div></div>
-                              )}
-                              <div
-                                className={`flex flex-row w-full ${
-                                  text.post_id > 0 || text.image_path !== ''
-                                    ? 'space-x-10 mt-1 '
-                                    : ''
-                                }`}
-                              >
-                                <div
-                                  className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5 text-lg  ${
-                                    isCurrentUser ? 'text-white' : 'text-cyan-950'
-                                  }`}
-                                  style={{
-                                    width:
-                                      text.post_id > 0 || text.image_path !== ''
-                                        ? 'calc(100% - 64px)'
-                                        : 'auto',
-                                  }}
-                                >
-                                  {text.post_id > 0 && posts.size > 0 ? (
-                                    <div className='rounded w-[120%] px-3 pb-2 pt-3 mb-1 pr-12 -mr-1.5 text-white'>
-                                      {posts.get(text.post_id) && (
-                                        <PostDisplay post={posts.get(text.post_id)} />
-                                      )}
-                                    </div>
-                                  ) : text.image_path !== '' ? (
-                                    <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
-                                      <img
-                                        src={`data:image/png;base64,${text.image_path}`}
-                                        className='w-64 h-64'
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div>{text.message}</div>
-                                  )}
-                                </div>
-
-                                <div className='flex flex-col items-end h-[44px] w-[80px] rounded justify-between '>
-                                  {isCurrentUser && moreid === text.id && (
-                                    <div className='flex flex-row bg-white px-3 space-x-3 py-1 -mt-8 border-cyan-400 rounded-md border-2'>
-                                      <button
-                                        className='text-sm'
-                                        onClick={() => {
-                                          setreplyid(text.id);
-                                          openmore(-1);
-                                        }}
-                                      >
-                                        Reply
-                                      </button>
-                                      <button
-                                        className='text-sm'
-                                        onClick={() => {
-                                          setdelete1(text.id);
-                                          setdelete2(-1);
-                                        }}
-                                      >
-                                        Delete
-                                      </button>
-                                      {text.post_id === -1 && text.image_path === '' && (
-                                        <button
-                                          className='text-sm'
-                                          onClick={() => {
-                                            setedit(text.id);
-                                            setedited(text.message);
-                                          }}
-                                        >
-                                          Edit
-                                        </button>
-                                      )}
-                                    </div>
-                                  )}
-                                  <div className='flex flex-row'>
-                                    {text.edited === 'yes' && (
-                                      <div className='text-stone-200 text-sm mr-1 mt-0.5 mb-0.5'>
-                                        Edited
-                                      </div>
-                                    )}
-                                    <img
-                                      src={more2}
-                                      onClick={() => {
-                                        console.log(text.id);
-                                        moreid === -1 ? openmore(text.id) : openmore(-1);
-                                      }}
-                                      className='w-4 h-4 mt-1 mr-2'
-                                      alt='more'
-                                    ></img>
-                                  </div>
-                                  {console.log(text.post_id === -1)}
-                                  {console.log(text.image_path === '')}
-                                  {text.post_id === -1 && text.image_path === '' && (
-                                    <div className='text-sm text-white w-16 mb-1 '>{time}</div>
-                                  )}
-                                </div>
-                              </div>
-                              {(text.post_id > 0 || text.image_path !== '') && (
-                                <div className='text-sm ml-2.5 -mt-1.5 text-white w-16 mb-1 '>
-                                  {time}
-                                </div>
-                              )}
-                            </div>
-                          )
-                        : text.delete2 === 'no' && (
-                            <div className='flex flex-row'>
-                              <div className='flex flex-col ml-2 my-1 rounded-md bg-cyan-200'>
-                                {text.replyid !== '' && texts.has(parseInt(text.replyid)) ? (
-                                  <div className='mx-2 border-2 border-sky-400 rounded-md shadow-md mt-2 py-1 w-11/12 px-1 text-cyan-950 text-lg bg-white'>
-                                    {console.log(texts.get(parseInt(text.replyid)).post_id)}
-                                    {console.log(posts)}
-                                    {console.log(
-                                      posts.get(texts.get(parseInt(text.replyid)).post_id),
-                                    )}
-                                    {texts.get(parseInt(text.replyid)).post_id > 0 &&
-                                      posts.size > 0 && (
-                                        <PostDisplay
-                                          post={posts.get(
-                                            texts.get(parseInt(text.replyid)).post_id,
-                                          )}
-                                        ></PostDisplay>
-                                      )}
-                                    {texts.get(parseInt(text.replyid)).image_path !== '' && (
-                                      <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
-                                        <img
-                                          src={`data:image/png;base64,${
-                                            texts.get(parseInt(text.replyid)).image_path
-                                          }`}
-                                          className='w-64 h-64'
-                                        />
-                                      </div>
-                                    )}
-                                    {texts.get(parseInt(text.replyid)).message}
-                                  </div>
-                                ) : (
-                                  <div></div>
-                                )}
-                                <div className='flex flex-row'>
-                                  <div
-                                    className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5 text-lg ${
-                                      isCurrentUser ? 'text-white' : 'text-cyan-950'
-                                    }`}
-                                    style={{
-                                      width:
-                                        text.post_id > 0 || text.image_path !== ''
-                                          ? 'calc(100% - 64px)'
-                                          : 'auto',
-                                    }}
-                                  >
-                                    {text.post_id > 0 ? (
-                                      <div className='rounded w-[150%] px-3 pb-2 pt-3 mb-1 pr-12 -mr-1.5 text-white'>
-                                        {posts.get(text.post_id) && posts.size > 0 && (
-                                          <PostDisplay post={posts.get(text.post_id)} />
-                                        )}
-                                      </div>
-                                    ) : text.image_path !== '' ? (
-                                      <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
-                                        <img
-                                          src={`data:image/png;base64,${text.image_path}`}
-                                          className='w-64 h-64'
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div>{text.message}</div>
-                                    )}
-                                  </div>
-
-                                  <div className='flex flex-col items-end mr-auto h-[44px] w-[80px] rounded justify-between'>
-                                    <img
-                                      src={more1}
-                                      onClick={() => {
-                                        console.log(text.id);
-                                        moreid === -1 ? openmore(text.id) : openmore(-1);
-                                      }}
-                                      className='w-4 h-4 mt-1 mr-2'
-                                      alt='more'
-                                    ></img>
-                                    {!text.post_id > 0 && text.image_path === '' && (
-                                      <div className='text-sm text-gray-400 w-16 mb-1 '>{time}</div>
-                                    )}
-                                  </div>
-                                </div>
-                                {(text.post_id > 0 || text.image_path !== '') && (
-                                  <div className='text-sm ml-3 -mt-1.5 text-gray-500 w-16 mb-1 '>
-                                    {time}
-                                  </div>
-                                )}
-                              </div>
-                              {moreid === text.id && (
-                                <div className='flex flex-row bg-white px-3 h-10 mt-1 space-x-3 rounded-md border-sky-400 border-2'>
+                            <div className='flex flex-col relative w-full items-end'>
+                              {isCurrentUser && moreid === text.id && (
+                                <div className='flex flex-row mr-4 absolute z-50 bg-white px-3 space-x-3 py-1 -mt-8 border-cyan-400 rounded-md border-2'>
                                   <button
-                                    className='text-sm'
+                                    className=''
                                     onClick={() => {
                                       setreplyid(text.id);
                                       openmore(-1);
@@ -1032,16 +826,489 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                                     Reply
                                   </button>
                                   <button
-                                    className='text-sm'
+                                    className=''
                                     onClick={() => {
-                                      setdelete2(text.id);
-                                      setdelete1(-1);
+                                      setdelete1(text.id);
+                                      setdelete2(-1);
+                                      openmore(-1);
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
+                                  {text.post_id === -1 && (
+                                    <button
+                                      className=''
+                                      onClick={() => {
+                                        setedit(text.id);
+                                        setedited(text.message);
+                                        openmore(-1);
+                                      }}
+                                    >
+                                      Edit
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                              <div className='flex relative flex-col mr-2 rounded-md my-1 ml-auto border bg-[#d9fdd2]'>
+                                {text.replyid !== '-1' && texts.has(parseInt(text.replyid)) ? (
+                                  <div>
+                                    {console.log(texts.get(parseInt(text.replyid)).post_id)}
+                                    {console.log(posts)}
+                                    {console.log(
+                                      posts.get(texts.get(parseInt(text.replyid)).post_id),
+                                    )}
+                                    {texts.get(parseInt(text.replyid)).post_id > 0 &&
+                                      posts.size > 0 && (
+                                        <div className='flex-col mx-2 border-2 rounded-md mt-2 p-1 text-cyan-950 bg-white'>
+                                          <PostDisplay1
+                                            post={posts.get(
+                                              texts.get(parseInt(text.replyid)).post_id,
+                                            )}
+                                          ></PostDisplay1>
+                                        </div>
+                                      )}
+                                    {texts.get(parseInt(text.replyid)).image_path !== '' && (
+                                      <div className='flex-col mx-2 border-2 rounded-md mt-2 p-1 text-cyan-950 bg-white'>
+                                        <div className='flex w-[100%]'>
+                                          <img
+                                            src={`data:image/png;base64,${
+                                              texts.get(parseInt(text.replyid)).image_path
+                                            }`}
+                                            className='w-72 h-72'
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                    {texts.get(parseInt(text.replyid)).message !== '' && (
+                                      <div className='flex-col mx-2 border-2 rounded-md mt-2 p-1 text-md text-cyan-950 bg-white'>
+                                        {texts.get(parseInt(text.replyid)).message}
+                                      </div>
+                                    )}{' '}
+                                  </div>
+                                ) : (
+                                  <div></div>
+                                )}
+                                <div
+                                  className={`flex flex-row w-full ${
+                                    text.post_id > 0 || text.image_path !== ''
+                                      ? 'space-x-10 mt-1 '
+                                      : ''
+                                  }`}
+                                >
+                                  <div
+                                    className={`flex w-full items-center rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5  ${
+                                      isCurrentUser ? 'text-white' : 'text-cyan-950'
+                                    }`}
+                                    style={{
+                                      width:
+                                        text.image_path !== '' ||
+                                        text.post_id > 0 ||
+                                        text.image_path !== ''
+                                          ? 'calc(100% - 64px)'
+                                          : 'auto',
+                                    }}
+                                  >
+                                    {text.post_id > 0 && posts.size > 0 ? (
+                                      <div className='rounded w-[120%] mb-1 pr-9 -mr-1.5 text-white'>
+                                        {posts.get(text.post_id) && (
+                                          <PostDisplay post={posts.get(text.post_id)} />
+                                        )}
+                                      </div>
+                                    ) : text.image_path !== '' ? (
+                                      <div className='-mr-40 w-[134%] mb-1'>
+                                        {/* <div className='flex flex-col w-[100%] p-2 rounded-md'> */}
+                                        <img
+                                          src={`data:image/png;base64,${text.image_path}`}
+                                          className='w-full h-64 rounded-md'
+                                        />
+                                        <div className='text-black text-lg -mb-2 mt-0.5'>
+                                          {text.message}
+                                        </div>
+                                        {/* </div> */}
+                                      </div>
+                                    ) : (
+                                      <div className='flex w-full flex-col -mb-1'>
+                                        <div className='flex'>
+                                          <div className='text-black text-lg'>{text.message}</div>
+
+                                          {text.replyid !== '-1' &&
+                                            texts.has(parseInt(text.replyid)) &&
+                                            (texts.get(parseInt(text.replyid)).image_path !== '' ||
+                                              texts.get(parseInt(text.replyid)).post_id > 0) && (
+                                              <button
+                                                className='bg-gray-100 absolute left-72 bottom-8 border rounded-md -mr-40 -mt-2'
+                                                onClick={() => {
+                                                  console.log(text.id);
+                                                  moreid === -1 ? openmore(text.id) : openmore(-1);
+                                                }}
+                                              >
+                                                <svg
+                                                  xmlns='http://www.w3.org/2000/svg'
+                                                  width='24'
+                                                  height='24'
+                                                  viewBox='0 0 24 24'
+                                                  fill='none'
+                                                  stroke='black'
+                                                  stroke-width='2'
+                                                  stroke-linecap='round'
+                                                  stroke-linejoin='round'
+                                                  class='w-5 h-5 rotate-180'
+                                                >
+                                                  <path d='m6 9 6 6 6-6'></path>
+                                                </svg>
+                                              </button>
+                                            )}
+                                        </div>
+                                        {text.post_id === -1 && text.image_path === '' && (
+                                          <div className='text-sm text-gray-500 w-16'>{time}</div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className='flex flex-col items-end h-[44px] w-[80px] rounded justify-between '>
+                                    <div className='flex items-center h-full flex-row'>
+                                      {text.edited === 'yes' && (
+                                        <div className='text-stone-200  mr-1 mt-0.5 mb-0.5'>
+                                          Edited
+                                        </div>
+                                      )}
+                                      {((text.replyid !== '-1' &&
+                                        texts.has(parseInt(text.replyid)) &&
+                                        texts.get(parseInt(text.replyid)).image_path === '' &&
+                                        texts.get(parseInt(text.replyid)).post_id === -1) ||
+                                        text.replyid === '-1') && (
+                                        <button
+                                          className='bg-gray-100 border rounded-md mr-1.5 -mt-2'
+                                          onClick={() => {
+                                            console.log(text.id);
+                                            moreid === -1 ? openmore(text.id) : openmore(-1);
+                                          }}
+                                        >
+                                          <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            width='24'
+                                            height='24'
+                                            viewBox='0 0 24 24'
+                                            fill='none'
+                                            stroke='currentColor'
+                                            stroke-width='2'
+                                            stroke-linecap='round'
+                                            stroke-linejoin='round'
+                                            class='w-5 h-5 rotate-180'
+                                          >
+                                            <path d='m6 9 6 6 6-6'></path>
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
+                                    {console.log(text.post_id === -1)}
+                                    {console.log(text.image_path === '')}
+                                  </div>
+                                </div>
+                                {(text.post_id > 0 || text.image_path !== '') && (
+                                  <div className='text-sm ml-3 -mt-2 text-gray-500 w-16 mb-1 '>
+                                    {time}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        : text.delete2 === 'no' && (
+                            // <div className='flex flex-row'>
+                            //   <div className='flex flex-col ml-2 my-1 rounded-md bg-cyan-200'>
+                            //     {text.replyid !== '' && texts.has(parseInt(text.replyid)) ? (
+                            //       <div className='mx-2 border-2 border-sky-400 rounded-md shadow-md mt-2 py-1 w-11/12 px-2 text-cyan-950 bg-white'>
+                            //         {console.log(texts.get(parseInt(text.replyid)).post_id)}
+                            //         {console.log(posts)}
+                            //         {console.log(
+                            //           posts.get(texts.get(parseInt(text.replyid)).post_id),
+                            //         )}
+                            //         {texts.get(parseInt(text.replyid)).post_id > 0 &&
+                            //           posts.size > 0 && (
+                            //             <PostDisplay
+                            //               post={posts.get(
+                            //                 texts.get(parseInt(text.replyid)).post_id,
+                            //               )}
+                            //             ></PostDisplay>
+                            //           )}
+                            //         {texts.get(parseInt(text.replyid)).image_path !== '' && (
+                            //           <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
+                            //             <img
+                            //               src={`data:image/png;base64,${
+                            //                 texts.get(parseInt(text.replyid)).image_path
+                            //               }`}
+                            //               className='w-64 h-64'
+                            //             />
+                            //           </div>
+                            //         )}
+                            //         {texts.get(parseInt(text.replyid)).message}
+                            //       </div>
+                            //     ) : (
+                            //       <div></div>
+                            //     )}
+                            //     <div className='flex flex-row'>
+                            //       <div
+                            //         className={`rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5 ${
+                            //           isCurrentUser ? 'text-white' : 'text-cyan-950'
+                            //         }`}
+                            //         style={{
+                            //           width:
+                            //             text.post_id > 0 || text.image_path !== ''
+                            //               ? 'calc(100% - 64px)'
+                            //               : 'auto',
+                            //         }}
+                            //       >
+                            //         {text.post_id > 0 ? (
+                            //           <div className='rounded w-[150%] px-3 pb-2 pt-3 mb-1 pr-12 -mr-1.5 text-white'>
+                            //             {posts.get(text.post_id) && posts.size > 0 && (
+                            //               <PostDisplay post={posts.get(text.post_id)} />
+                            //             )}
+                            //           </div>
+                            //         ) : text.image_path !== '' ? (
+                            //           <div className='w-[100%] -mr-14 px-3 pb-2 pt-3 mb-1'>
+                            //             <img
+                            //               src={`data:image/png;base64,${text.image_path}`}
+                            //               className='w-64 h-64'
+                            //             />
+                            //           </div>
+                            //         ) : (
+                            //           <div>{text.message}</div>
+                            //         )}
+                            //       </div>
+
+                            //       <div className='flex flex-col items-end mr-auto h-[44px] w-[80px] rounded justify-between'>
+                            //         <img
+                            //           src={more1}
+                            //           onClick={() => {
+                            //             console.log(text.id);
+                            //             moreid === -1 ? openmore(text.id) : openmore(-1);
+                            //           }}
+                            //           className='w-4 h-4 mt-1 mr-2'
+                            //           alt='more'
+                            //         ></img>
+                            //         {!text.post_id > 0 && text.image_path === '' && (
+                            //           <div className=' text-gray-400 w-16 mb-1 '>{time}</div>
+                            //         )}
+                            //       </div>
+                            //     </div>
+                            //     {(text.post_id > 0 || text.image_path !== '') && (
+                            //       <div className=' ml-3 -mt-1.5 text-gray-500 w-16 mb-1 '>
+                            //         {time}
+                            //       </div>
+                            //     )}
+                            //   </div>
+                            //   {moreid === text.id && (
+                            //     <div className='flex flex-row bg-white px-3 h-10 mt-1 space-x-3 rounded-md border-sky-400 border-2'>
+                            //       <button
+                            //         className=''
+                            //         onClick={() => {
+                            //           setreplyid(text.id);
+                            //           openmore(-1);
+                            //         }}
+                            //       >
+                            //         Reply
+                            //       </button>
+                            //       <button
+                            //         className=''
+                            //         onClick={() => {
+                            //           setdelete2(text.id);
+                            //           setdelete1(-1);
+                            //         }}
+                            //       >
+                            //         Delete
+                            //       </button>
+                            //     </div>
+                            //   )}
+                            // </div>
+
+                            <div className='flex flex-col relative'>
+                              {moreid === text.id && (
+                                <div className='flex flex-row mr-4 absolute z-50 bg-white px-3 space-x-3 py-1 -mt-8 border-cyan-400 rounded-md border-2'>
+                                  <button
+                                    className=''
+                                    onClick={() => {
+                                      setreplyid(text.id);
+                                      openmore(-1);
+                                    }}
+                                  >
+                                    Reply
+                                  </button>
+                                  <button
+                                    className=''
+                                    onClick={() => {
+                                      setdelete1(text.id);
+                                      setdelete2(-1);
+                                      openmore(-1);
                                     }}
                                   >
                                     Delete
                                   </button>
                                 </div>
                               )}
+                              <div className='flex relative flex-col mr-2 rounded-md my-1 ml-1.5 border bg-cyan-50'>
+                                {text.replyid !== '-1' && texts.has(parseInt(text.replyid)) ? (
+                                  <div>
+                                    {console.log(texts.get(parseInt(text.replyid)).post_id)}
+                                    {console.log(posts)}
+                                    {console.log(
+                                      posts.get(texts.get(parseInt(text.replyid)).post_id),
+                                    )}
+                                    {texts.get(parseInt(text.replyid)).post_id > 0 &&
+                                      posts.size > 0 && (
+                                        <div className='flex-col mx-2 border-2 rounded-md mt-2 p-1 text-cyan-950 bg-white'>
+                                          <PostDisplay1
+                                            post={posts.get(
+                                              texts.get(parseInt(text.replyid)).post_id,
+                                            )}
+                                          ></PostDisplay1>
+                                        </div>
+                                      )}
+                                    {texts.get(parseInt(text.replyid)).image_path !== '' && (
+                                      <div className='flex-col mx-2 border-2 rounded-md mt-2 p-1 text-cyan-950 bg-white'>
+                                        <div className='flex w-[100%]'>
+                                          <img
+                                            src={`data:image/png;base64,${
+                                              texts.get(parseInt(text.replyid)).image_path
+                                            }`}
+                                            className='w-72 h-72'
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                    {texts.get(parseInt(text.replyid)).message !== '' && (
+                                      <div className='flex-col mx-2 border-2 rounded-md mt-2 p-1 text-md text-cyan-950 bg-white'>
+                                        {texts.get(parseInt(text.replyid)).message}
+                                      </div>
+                                    )}{' '}
+                                  </div>
+                                ) : (
+                                  <div></div>
+                                )}
+                                <div
+                                  className={`flex flex-row w-full ${
+                                    text.post_id > 0 || text.image_path !== ''
+                                      ? 'space-x-10 mt-1 '
+                                      : ''
+                                  }`}
+                                >
+                                  <div
+                                    className={`flex w-full items-center rounded px-3 pb-2 pt-1.5 mb-1 -mr-1.5  ${
+                                      isCurrentUser ? 'text-white' : 'text-cyan-950'
+                                    }`}
+                                    style={{
+                                      width:
+                                        text.image_path !== '' ||
+                                        text.post_id > 0 ||
+                                        text.image_path !== ''
+                                          ? 'calc(100% - 64px)'
+                                          : 'auto',
+                                    }}
+                                  >
+                                    {text.post_id > 0 && posts.size > 0 ? (
+                                      <div className='rounded w-[120%] mb-1 pr-9 -mr-1.5 text-white'>
+                                        {posts.get(text.post_id) && (
+                                          <PostDisplay post={posts.get(text.post_id)} />
+                                        )}
+                                      </div>
+                                    ) : text.image_path !== '' ? (
+                                      <div className='-mr-40 w-[134%] mb-1'>
+                                        {/* <div className='flex flex-col w-[100%] p-2 rounded-md'> */}
+                                        <img
+                                          src={`data:image/png;base64,${text.image_path}`}
+                                          className='w-full h-64 rounded-md'
+                                        />
+                                        <div className='text-black text-lg -mb-2 mt-0.5'>
+                                          {text.message}
+                                        </div>
+                                        {/* </div> */}
+                                      </div>
+                                    ) : (
+                                      <div className='flex w-full flex-col -mb-1'>
+                                        <div className='flex'>
+                                          <div className='text-black text-lg'>{text.message}</div>
+
+                                          {text.replyid !== '-1' &&
+                                            texts.has(parseInt(text.replyid)) &&
+                                            (texts.get(parseInt(text.replyid)).image_path !== '' ||
+                                              texts.get(parseInt(text.replyid)).post_id > 0) && (
+                                              <button
+                                                className='bg-gray-100 absolute left-72 bottom-8 border rounded-md -mr-40 -mt-2'
+                                                onClick={() => {
+                                                  console.log(text.id);
+                                                  moreid === -1 ? openmore(text.id) : openmore(-1);
+                                                }}
+                                              >
+                                                <svg
+                                                  xmlns='http://www.w3.org/2000/svg'
+                                                  width='24'
+                                                  height='24'
+                                                  viewBox='0 0 24 24'
+                                                  fill='none'
+                                                  stroke='black'
+                                                  stroke-width='2'
+                                                  stroke-linecap='round'
+                                                  stroke-linejoin='round'
+                                                  class='w-5 h-5 rotate-180'
+                                                >
+                                                  <path d='m6 9 6 6 6-6'></path>
+                                                </svg>
+                                              </button>
+                                            )}
+                                        </div>
+                                        {text.post_id === -1 && text.image_path === '' && (
+                                          <div className='text-sm text-gray-500 w-16'>{time}</div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className='flex flex-col items-end h-[44px] w-[80px] rounded justify-between '>
+                                    <div className='flex items-center h-full flex-row'>
+                                      {text.edited === 'yes' && (
+                                        <div className='text-stone-200  mr-1 mt-0.5 mb-0.5'>
+                                          Edited
+                                        </div>
+                                      )}
+                                      {((text.replyid !== '-1' &&
+                                        texts.has(parseInt(text.replyid)) &&
+                                        texts.get(parseInt(text.replyid)).image_path === '' &&
+                                        texts.get(parseInt(text.replyid)).post_id === -1) ||
+                                        text.replyid === '-1') && (
+                                        <button
+                                          className='bg-gray-100 border rounded-md mr-1.5 -mt-2'
+                                          onClick={() => {
+                                            console.log(text.id);
+                                            moreid === -1 ? openmore(text.id) : openmore(-1);
+                                          }}
+                                        >
+                                          <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            width='24'
+                                            height='24'
+                                            viewBox='0 0 24 24'
+                                            fill='none'
+                                            stroke='currentColor'
+                                            stroke-width='2'
+                                            stroke-linecap='round'
+                                            stroke-linejoin='round'
+                                            class='w-5 h-5 rotate-180'
+                                          >
+                                            <path d='m6 9 6 6 6-6'></path>
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
+                                    {console.log(text.post_id === -1)}
+                                    {console.log(text.image_path === '')}
+                                  </div>
+                                </div>
+                                {(text.post_id > 0 || text.image_path !== '') && (
+                                  <div className='text-sm ml-3 -mt-2 text-gray-500 w-16 mb-1 '>
+                                    {time}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                     </div>
@@ -1063,15 +1330,15 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         <div className='w-full bg-gray-300 h-[1px]'></div>
         {console.log(texts.get(reply))}
         {reply !== -1 && (
-          <div className='flex flex-row fixed bottom-16 left-92 w-8/12 ml-28'>
+          <div className='flex flex-row fixed bottom-14 left-92 w-8/12 ml-28'>
             <img
               src={remove}
               onClick={() => {
                 setreplyid(-1);
               }}
-              className='absolute -right-1 -top-3 h-6 w-6'
+              className='absolute -right-2 -top-3 h-5 w-5'
             ></img>
-            <div className='flex justify-start w-full py-2 rounded-md p-1 border-2 bg-cyan-600 text-white border-cyan-900 shadow-sm'>
+            <div className='flex justify-start w-full py-0.5 px-1.5 pt-1.5 rounded-md border-2 border-gray-300 bg-white shadow-sm'>
               <div className={``}>{texts.get(reply).message}</div>
               {texts.get(reply).image_path !== '' && (
                 <img src={image_icon} className='w-8 h-8'></img>
@@ -1082,7 +1349,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
         )}
         <div className='flex items-center w-full px-2 py-1'>
           <RoundedBtn
-            size='30'
+            size='28'
             onClick={() => {
               openemoji(!emoji);
             }}
@@ -1090,7 +1357,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
           />
           <span className='mr-2 '>
             <RoundedBtn
-              size='32'
+              size='30'
               onClick={() => {
                 fileInput.current.click();
                 setImageText(true);
@@ -1110,7 +1377,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
           </span>
           {imagetext && file.size > 0 && (
             <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
-              <div className='flex space-y-4 items-start bg-cyan-100 border-4 border-cyan-600 rounded-md py-6 px-5 w-1/3 justify-between relative'>
+              <div className='flex space-y-4 items-start bg-cyan-50 border-2 border-gray-500 rounded-md py-6 px-5 w-1/3 justify-between relative'>
                 <div className='flex flex-col w-full'>
                   {file && <img src={URL.createObjectURL(file)} className='h-auto w-full'></img>}{' '}
                   <div className='flex w-full items-center'>
@@ -1120,23 +1387,25 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                       onKeyDown={handleKeyPress}
                       ref={inputRef}
                       value={message}
-                      className='w-[100%] outline-none mt-4 text-lg p-1 rounded-md border-2 border-orange-300 shadow-md'
+                      className='w-[100%] focus:outline-none mt-4 p-1.5 px-2 rounded-md border border-gray-300 shadow-sm'
                     ></input>
                     <IoSend
                       onClick={async () => {
                         await insert();
                         setImageText(false);
+                        setmessage('');
                       }}
-                      size={24}
-                      className='text-[#52575b] -ml-8 mt-3 focus:outline-none'
+                      size={20}
+                      className='text-[#52575b] -ml-7 mt-3 focus:outline-none'
                     ></IoSend>
                   </div>
                 </div>
                 <img
                   src={remove}
-                  className='absolute -top-7 -right-3 h-6 w-6'
+                  className='absolute -top-7 -right-2 h-5 w-5'
                   onClick={() => {
                     setImageText(false);
+                    setmessage('');
                   }}
                 ></img>
               </div>
@@ -1145,13 +1414,30 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
           <input
             type='text'
             placeholder='Type a message'
-            className='bg-gray-200 rounded-lg outline-none text-lg text-cyan-950 w-[1200px] h-[45px] px-3 placeholder:text-lg placeholder:text-gray-600'
-            style={{ fontSize: '1.5em' }} // Adjust the '2em' value based on your preference
+            className='items-center bg-gray-200 rounded-lg focus:outline-none  text-cyan-950 w-[1000px] h-[45px] px-3 placeholder: placeholder:text-gray-600'
             onChange={handleInputChange}
             onKeyDown={handleKeyPress}
             ref={inputRef}
             value={message}
           />
+
+          <button class='inline-flex items-center mx-1 justify-center whitespace-nowrap  font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 rounded-full'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              stroke-width='2'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              class='w-6 h-6 text-gray-600 dark:text-gray-400'
+            >
+              <path d='m22 2-7 20-4-9-9-4Z'></path>
+              <path d='M22 2 11 13'></path>
+            </svg>
+          </button>
         </div>
       </div>
     );

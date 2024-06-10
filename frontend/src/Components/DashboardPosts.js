@@ -12,6 +12,7 @@ import Users from './Users';
 import { socket } from './DashBoard';
 import MainComment from './MainComment';
 import Comments from './Comments';
+import { useSwipeable } from 'react-swipeable';
 import { useIndex } from './IndexContext';
 import SharePost from './SharePost';
 export const fetchPost = async (following2) => {
@@ -52,6 +53,19 @@ const DashBoardPosts = () => {
   const [map1, setMap1] = useState(new Map());
   const { username } = useIndex();
   const [displayLikes, setDisplayLikes] = useState(-1);
+  // const SwipeableImage = ({ src, alt, onSwipeLeft, onSwipeRight }) => {
+  //   const swipeHandlers = useSwipeable({
+  //     onSwipedLeft: onSwipeLeft,
+  //     onSwipedRight: onSwipeRight,
+  //   });
+
+  //   return <img src={src} alt={alt} {...swipeHandlers} />;
+  // };
+  const swipeHandlers = (post, idx) => ({
+    onSwipedLeft: () => handlePreviousImage(post, idx),
+    onSwipedRight: () => handleNextImage(post, idx),
+  });
+
   const Like = ({ id, username }) => {
     const [liked, setLiked] = useState(false);
     // find username of the post
@@ -120,12 +134,26 @@ const DashBoardPosts = () => {
     }, [username]);
 
     return (
-      <img
+      <button
         onClick={likePostHandle}
-        src={liked ? like1 : like}
-        className='w-7 h-7 lg:w-8 lg:h-8 md:w-8 md:h-8'
-        alt='Like Icon'
-      />
+        class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          width='24'
+          height='24'
+          viewBox='0 0 24 24'
+          fill={liked ? 'black' : 'none'}
+          stroke='currentColor'
+          stroke-width='2'
+          stroke-linecap='round'
+          stroke-linejoin='round'
+          class='h-6 w-6'
+        >
+          <path d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'></path>
+        </svg>
+        <span class='sr-only'>Like</span>
+      </button>
     );
   };
   const fetchcomment = async (id) => {
@@ -218,9 +246,10 @@ const DashBoardPosts = () => {
   };
 
   const handleNextImage = (post1, idx) => {
-    setCurrentImageIndex((prevIndex) => {
-      const newIndexes = [...prevIndex];
-      if (newIndexes[idx] < post1.length - 1) {
+    console.log('handle next');
+    setCurrentImageIndex((prevIndexes) => {
+      const newIndexes = [...prevIndexes];
+      if (newIndexes[idx] < post1.pictures.length - 1) {
         newIndexes[idx] += 1;
       }
       return newIndexes;
@@ -228,8 +257,9 @@ const DashBoardPosts = () => {
   };
 
   const handlePreviousImage = (post1, idx) => {
-    setCurrentImageIndex((prevIndex) => {
-      const newIndexes = [...prevIndex];
+    console.log('handle previous');
+    setCurrentImageIndex((prevIndexes) => {
+      const newIndexes = [...prevIndexes];
       if (newIndexes[idx] > 0) {
         newIndexes[idx] -= 1;
       }
@@ -324,7 +354,7 @@ const DashBoardPosts = () => {
     fetchlikes();
   }, [posts]);
   return (
-    <div className='flex flex-col w-[97%] ml-1.5 overflow-y-scroll -mt-3 mb-2 lg:h-[100%] lg:w-[45%] md:mr-3 lg:-mt-2 md:-mt-2  lg:mx-16'>
+    <div className='flex flex-col items-center w-[100%] overflow-y-scroll  lg:h-[97%] lg:w-[55%] md:mr-2 lg:mt-2.5 mt-2  '>
       {console.log(map)}
       {console.log(map1)}
       {console.log(posts)}
@@ -335,66 +365,133 @@ const DashBoardPosts = () => {
           return (
             <div
               key={idx}
-              className='w-full md:h-[98%] flex flex-col items-center border-2 border-orange-200 shadow-md bg-orange-50 my-4 rounded-lg flex-1'
+              className='w-[90%] md:h-[98%] border bg-stone-100 p-1 flex flex-col items-center mb-4 rounded-lg flex-1'
             >
-              <div className='flex flex-row w-[93%] m-2 -ml-2 items-center justify-between space-x-4'>
+              <div className='flex flex-col w-[93%] m-2 -ml-2  space-x-4'>
                 <div className='flex flex-row items-center space-x-4'>
                   <img
                     src={`data:image/png;base64,${post.profile}`}
-                    className='rounded-full h-10 lg:h-16 md:h-16 w-10 lg:w-16 md:w-16'
+                    className='rounded-full h-10 lg:h-12 md:h-16 w-10 lg:w-12 md:w-16'
                   ></img>
-                  <div className='text-2xl lg:text-3xl md:text-3xl text-cyan-950'>
+                  <div className='text-2xl lg:text-2xl font-medium md:text-3xl text-black'>
                     {post.person2}
                   </div>
                 </div>
-                <img src={more} className='w-10 h-10 '></img>
               </div>
-              <div className='h-[2px] w-[96%] md:mb-4 lg:mb-4 bg-stone-300'></div>
-              <div className='flex flex-col w-[102%] -mt-12 lg:-mt-14'>
+              <div className='flex w-[95%] -mt-3.5 mb-2 items-center justify-center'>
+                <div className='h-[2px] my-3 w-[110%] bg-gray-300'></div>
+              </div>
+              <div className='flex flex-col w-[102%] -mt-14'>
                 {post.pictures && post.pictures.length > 0 && (
                   <div className='flex flex-row items-center justify-around w-full relative'>
-                    <img
-                      src={leftarrow}
-                      className='w-[2rem] h-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] md:h-[2.5rem] md:w-[2.5rem] lg:h-[3rem] lg:w-[3rem] cursor-pointer z-10 -mr-14 mt-4 rounded-full p-2'
-                      onClick={() => handlePreviousImage(post.pictures, idx)}
-                    />
                     {post.pictures[currentImageIndex[idx]] && (
                       <img
                         key={currentImageIndex[idx]}
                         src={`data:image/png;base64,${post.pictures[currentImageIndex[idx]]}`}
                         alt={`post Image ${currentImageIndex[idx]}`}
                         className='mt-12 h-[14rem] sm:h-[28rem] md:h-[28rem] lg:h-[28rem] w-[95%] lg:w-11/12 md:w-11/12 rounded-md object-cover'
+                        {...swipeHandlers(post, idx)}
                       />
                     )}
-                    <img
-                      src={rightarrow}
-                      className='w-[2rem] h-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] md:h-[2.5rem] md:w-[2.5rem] lg:h-[3rem] lg:w-[3rem] cursor-pointer -ml-14 mt-4 rounded-full p-2'
-                      onClick={() => handleNextImage(post.pictures, idx)}
-                    />
                   </div>
                 )}
                 <div className='flex flex-col w-auto ml-5 mt-1 lg:mt-2 md:mt-2'>
-                  <div className='flex flex-row w-full mt-1'>
-                    <Like id={post.id} username={username}></Like>
-                    <img
-                      onClick={async () => {
-                        setComment(post.id);
-                        await fetchcomment(post.id);
-                      }}
-                      src={comment}
-                      className='w-7 h-7 lg:w-8 lg:h-8 md:w-8 md:h-8 ml-4 cursor-pointer'
-                    ></img>
-                    <SharePost id={post.id}></SharePost>
+                  <div className='flex relative -mt-1'>
+                    <div className='flex flex-row '>
+                      <Like id={post.id} username={username}></Like>
+                      <button
+                        onClick={async () => {
+                          setComment(post.id);
+                          await fetchcomment(post.id);
+                        }}
+                        class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          stroke-width='2'
+                          stroke-linecap='round'
+                          stroke-linejoin='round'
+                          class='h-6 w-6'
+                        >
+                          <path d='m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z'></path>
+                        </svg>
+                        <span class='sr-only'>Comment</span>
+                      </button>
+                      <SharePost id={post.id}></SharePost>
+                    </div>
+                    <div className='flex absolute top-3 -left-1 w-full justify-center gap-4 -mt-1'>
+                      <div
+                        className='flex cursor-pointer h-5 w-5'
+                        onClick={() => {
+                          handlePreviousImage(post, idx);
+                        }}
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          stroke-width='2'
+                          stroke-linecap='round'
+                          stroke-linejoin='round'
+                          class='h-5 w-5 cursor-pointer'
+                        >
+                          <path d='m12 19-7-7 7-7'></path>
+                          <path d='M19 12H5'></path>
+                        </svg>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        {post.pictures.map((_, index) => (
+                          <div
+                            key={index}
+                            className={`h-2 w-2 rounded-full ${
+                              index === currentImageIndex[idx]
+                                ? 'bg-gray-700'
+                                : 'bg-gray-400 dark:bg-gray-600'
+                            }`}
+                          ></div>
+                        ))}
+                      </div>
+                      <div
+                        className='cursor-pointer'
+                        onClick={() => {
+                          handleNextImage(post, idx);
+                        }}
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          stroke-width='2'
+                          stroke-linecap='round'
+                          stroke-linejoin='round'
+                          class='h-5 w-5 cursor-pointer'
+                        >
+                          <path d='M5 12h14'></path>
+                          <path d='m12 5 7 7-7 7'></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   {console.log(map)}
                   {displayLikes === idx && (
                     <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
-                      <div className='flex flex-col w-1/3 h-5/6 rounded-md bg-orange-100 border-2 border-orange-300'>
+                      <div className='flex flex-col w-1/4 px-4 h-5/6 rounded-md bg-white'>
                         <div className='flex w-full justify-between'>
-                          <div className='text-3xl font-normal m-4 text-sky-950'>Likes</div>
+                          <div className='text-3xl font-normal my-4 ml-1 text-black'>Likes</div>
                           <img
                             src={remove}
-                            className='h-5 w-5 -m-3'
+                            className='h-5 w-5 -mt-2 -mr-5'
                             onClick={() => {
                               setDisplayLikes(-1);
                             }}
@@ -404,31 +501,32 @@ const DashBoardPosts = () => {
                       </div>
                     </div>
                   )}
-
-                  <div
-                    className='ml-1 text-md cursor-pointer'
-                    onClick={() => {
-                      setDisplayLikes(idx);
-                    }}
-                  >
-                    {' '}
-                    <div className='text-lg text-md'>
-                      {posts && map && map.has(post.id) ? map.get(post.id).length : 0} likes
+                  <div className='ml-3 -mt-0.5 -space-y-0.5'>
+                    <div
+                      className='text-md cursor-pointer'
+                      onClick={() => {
+                        setDisplayLikes(idx);
+                      }}
+                    >
+                      {' '}
+                      <div className='text-md'>
+                        {posts && map && map.has(post.id) ? map.get(post.id).length : 0} likes
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    onClick={async () => {
-                      setComment(post.id);
-                      await fetchcomment(post.id);
-                    }}
-                    className='text-md cursor-pointer -mt-1 md:-mt-1.5 ml-1'
-                  >
-                    {console.log(map1)}
-                    View {map1.get(post.id)} comments
-                  </div>
-                  <div className='flex flex-row ml-1 -mt-1 md:-mt-1.5 space-x-1 mb-1'>
-                    <div className='text-xl font-semibold'>{post.person2}</div>
-                    <div className='text-xl'>{post.caption}</div>
+                    <div
+                      onClick={async () => {
+                        setComment(post.id);
+                        await fetchcomment(post.id);
+                      }}
+                      className='text-md cursor-pointer md:-mt-1.5 '
+                    >
+                      {console.log(map1)}
+                      View {map1.get(post.id)} comments
+                    </div>
+                    <div className='flex flex-row md:-mt-1.5 space-x-1 '>
+                      <div className='text-md font-semibold'>{post.person2}</div>
+                      <div className='text-md'>{post.caption}</div>
+                    </div>
                   </div>
                 </div>
                 <div className='lg:ml-4 md:ml-4 ml-2 mt-2 w-[96%] mb-2'>
@@ -436,24 +534,21 @@ const DashBoardPosts = () => {
                 </div>
                 {comment1 === post.id && (
                   <div className='fixed inset-0 flex items-center justify-center z-50 backdrop-filter w-full h-full backdrop-blur-sm bg-black bg-opacity-50'>
-                    <div className='bg-white w-2/3 h-5/6 p-4 rounded-lg flex flex-col justify-between'>
+                    <div className='absolute bg-white w-2/3 h-5/6 p-4 rounded-lg flex justify-between'>
                       <Comments
                         id={post.id}
                         comments1={[...comments]}
                         username={username}
                       ></Comments>
-                      <div className='flex flex-row space-x-2 items-center'>
+                      <div className='absolute top-3 right-4 flex flex-row space-x-2 items-center'>
                         <button
-                          className='bg-sky-300 py-1.5 -mb-1 px-2 border-2 rounded-md shadow-md border-gray-300'
+                          className='bg-black text-white py-1.5 -mb-1 px-4 rounded-md shadow-md'
                           onClick={() => {
                             setComment(-1);
                           }}
                         >
                           Close
                         </button>
-                        <div className='-mb-2  w-full'>
-                          <MainComment id={post.id} username={username}></MainComment>
-                        </div>
                       </div>
                     </div>
                   </div>

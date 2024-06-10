@@ -170,13 +170,38 @@ const SharePost = ({ id }) => {
 
   return (
     <div>
-      <img
+      {/* <img
         src={share}
         onClick={() => {
           setShared(true);
         }}
         className='w-6 h-6 lg:w-7 lg:h-7 md:w-7 md:h-7 mt-0.5 ml-4 cursor-pointer'
-      ></img>
+      ></img> */}
+
+      <button
+        onClick={() => {
+          setShared(true);
+        }}
+        class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          width='24'
+          height='24'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          stroke-width='2'
+          stroke-linecap='round'
+          stroke-linejoin='round'
+          class='h-6 w-6'
+        >
+          <path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path>
+          <polyline points='16 6 12 2 8 6'></polyline>
+          <line x1='12' x2='12' y1='2' y2='15'></line>
+        </svg>
+        <span class='sr-only'>Share</span>
+      </button>
       {shared && (
         <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
           <div className='flex flex-row space-y-4 items-start bg-cyan-100 border-2 border-cyan-400 rounded-md py-6 px-5 w-1/3 relative h-[80%]'>
@@ -203,16 +228,16 @@ const SharePost = ({ id }) => {
                         checked={selectedUsers.some(
                           (selectedUser) => selectedUser.person2 === user.person2,
                         )}
-                        className='h-5 w-5 mr-2'
+                        className='h-5 w-5 mr-2 focus:outline-none'
                       />
                     </div>
                   );
                 })}
               </div>
               <button
-                onClick={async() => {
+                onClick={async () => {
                   setShared(false);
-                  await sendPosts()
+                  await sendPosts();
                 }}
                 className='w-full border-2 border-sky-400 bg-cyan-800 py-1.5 rounded-lg text-white text-2xl'
               >

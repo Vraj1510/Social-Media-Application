@@ -152,7 +152,6 @@ io.on('connection', (socket) => {
       }
     } catch (err) {
       console.error(err);
-      // Handle errors if any
     }
   });
 
@@ -483,22 +482,6 @@ app.post('/handlelogin', async (req, res) => {
       (user) => user.user_name === username && bcrypt.compare(password, user.password),
     );
     if (isValidLogin) {
-      // req.session.username = username;
-      // console.log('session username');
-      // console.log(req.session);
-      // const accessToken = jwt.sign({ username: username }, 'jwt-access-token-secret-key', {
-      //   expiresIn: '200m',
-      // });
-      // const refreshToken = jwt.sign({ username: username }, 'jwt-refresh-token-secret-key', {
-      //   expiresIn: '500m',
-      // });
-      // res.cookie('accessToken', accessToken, { maxAge: 200 * 60 * 1000 });
-      // res.cookie('refreshToken', refreshToken, {
-      //   maxAge: 500 * 60 * 1000,
-      //   httpOnly: true,
-      //   secure: true,
-      //   sameSite: 'strict',
-      // });
       return res.json({ message: 'Login successful' });
     } else {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -630,7 +613,7 @@ app.put('/fetchImage', async (req, res) => {
     const { username1 } = req.body;
     const result = await pool.query('SELECT profile FROM user1 WHERE user_name = $1', [username1]);
     console.log('Fetching images');
-    console.log(result);
+    console.log(result.rows);
     console.log(username1);
     console.log(result.rows[0].profile);
     fs.readFile(result.rows[0].profile, (err, data) => {
@@ -648,7 +631,17 @@ app.put('/fetchImage', async (req, res) => {
 });
 app.post('/addpost', upload.array('files', 10), async (req, res) => {
   try {
-    const { username, caption } = req.body;
+    // formdata.append('username', username);
+    // formdata.append('caption', caption);
+    // formdata.append('minutes', date.getMinutes() % 60);
+    // formdata.append('hours', date.getHours() % 60);
+    // formdata.append('day', date.getDay());
+    // formdata.append('date', date.getDate());
+    // formdata.append('month', date.getMonth());
+    // formdata.append('year', date.getFullYear());
+    // var ampm = date.getHours() > 12 ? 'PM' : 'AM';
+    // formdata.append('ampm', ampm);
+    const { username, caption, minutes, hours, day, date, month, year, ampm } = req.body;
     const files = req.files;
     console.log(username);
     console.log(caption);
@@ -687,8 +680,8 @@ app.post('/addpost', upload.array('files', 10), async (req, res) => {
       });
     }
     const response1 = await pool.query(
-      'INSERT INTO post(user_name,caption,pictures) VALUES($1,$2,$3)',
-      [username, caption, newFilePaths],
+      'INSERT INTO post(user_name,caption,pictures,minutes,hour,day,date,month,year,ampm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+      [username, caption, newFilePaths, minutes, hours, day, date, month, year, ampm],
     );
     res.json({
       success: true,
@@ -732,14 +725,27 @@ app.post('/insert', async (req, res) => {
 app.post('/sentrequest', async (req, res) => {
   // console.log(req.body);
   try {
+    var date = new Date();
     const { person1, person2, id, pid } = req.body;
     await pool.query(`INSERT INTO "requestsent" (person1, person2) VALUES ($1, $2)`, [
       person1,
       person2,
     ]);
     await pool.query(
-      `INSERT INTO "notifications" (person1, person2, id, pid,seen1,seen2) VALUES ($1, $2, $3, $4,'no','no')`,
-      [person1, person2, id, pid],
+      `INSERT INTO "notifications" (person1, person2, id, pid,seen1,seen2,minutes,hour,day,date,month,year,ampm) VALUES ($1, $2, $3, $4,'no','no',$5,$6,$7,$8,$9,$10,$11)`,
+      [
+        person1,
+        person2,
+        id,
+        pid,
+        date.getMinutes() % 60,
+        date.getHours() % 60,
+        date.getDay(),
+        date.getDate(),
+        date.getMonth(),
+        date.getFullYear(),
+        date.getHours() > 12 ? 'PM' : 'AM',
+      ],
     );
     res.json('YES');
   } catch (err) {
@@ -890,6 +896,7 @@ app.put('/updatenotification', async (req, res) => {
   try {
     console.log(req.body);
     const { user1, user2, id1, pid1 } = req.body;
+    var date = new Date();
     const deleteResult = await pool.query(
       'DELETE FROM notifications WHERE person1=$1 AND person2=$2 AND id=$3 AND pid=$4',
       [user1, user2, id1, pid1],
@@ -898,14 +905,24 @@ app.put('/updatenotification', async (req, res) => {
     if (deleteResult.rowCount === 0) {
       res.status(404).json({ error: 'Notification not found' });
     } else {
-      await pool.query('INSERT INTO notifications VALUES($1, $2, $3, $4,$5,$6)', [
-        user1,
-        user2,
-        'following',
-        pid1,
-        'no',
-        'yes',
-      ]);
+      await pool.query(
+        'INSERT INTO notifications VALUES($1, $2, $3, $4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+        [
+          user1,
+          user2,
+          'following',
+          pid1,
+          'no',
+          'yes',
+          date.getMinutes() % 60,
+          date.getHours() % 60,
+          date.getDay(),
+          date.getDate(),
+          date.getMonth(),
+          date.getFullYear(),
+          date.getHours() > 12 ? 'PM' : 'AM',
+        ],
+      );
       res.status(200).json({ message: 'Notification updated successfully' });
     }
   } catch (err) {
@@ -941,7 +958,6 @@ app.put('/updatenote', async (req, res) => {
       WHERE user_name = $1
       RETURNING *
     `;
-    // console.log(inputValue);
     const updatedUser = await pool.query(updateQuery, [username, inputValue]);
     res.json({ success: true, message: 'Profile updated successfully', data: updatedUser.rows });
   } catch (err) {
@@ -1003,7 +1019,7 @@ app.put('/fetchnote', async (req, res) => {
     const allTodos = await pool.query('SELECT note FROM user1 WHERE user_name ILIKE $1', [
       username1,
     ]);
-    res.json({ success: true, data: allTodos.rows });
+    res.json({ success: true, data: allTodos.rows[0].note });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -1383,6 +1399,27 @@ app.put('/deletepost', async (req, res) => {
     const { id } = req.body;
     const response1 = await pool.query('DELETE FROM post WHERE id=$1', [id]);
     const response2 = await pool.query('DELETE FROM messages WHERE post_id=$1', [id]);
+    const response3 = await pool.query('DELETE FROM comments WHERE post_id=$1', [id]);
+    const response4 = await pool.query('DELETE FROM likes WHERE post_id=$1', [id]);
+    const response5 = await pool.query(
+      'DELETE FROM comment_like WHERE comment_id NOT IN (SELECT comment_id FROM comments)',
+    );
+    let deletedCount = 1; // Initialize a variable to track the number of deleted entries
+
+    while (deletedCount > 0) {
+      const response6 = await pool.query(`
+    DELETE FROM comments 
+    WHERE reply_id NOT IN (SELECT comment_id FROM comments)
+  `);
+
+      deletedCount = response6.rowCount; // Update deletedCount with the number of rows deleted in the current iteration
+
+      console.log(`${deletedCount} entries deleted in this iteration.`);
+
+      // Add a small delay to prevent overwhelming the database
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
     res.json({ message: 'ok' });
     res.json({ success: true });
   } catch (err) {
@@ -1413,30 +1450,49 @@ app.put('/findfriend', async (req, res) => {
     const finalusers = subtractedUsers.map((user1) => ({ user: user1.user }));
 
     // console.log(finalusers);
+
     const usersWithProfileImages = await Promise.all(
-      finalusers.map(async (user) => {
-        const { user: friendUsername } = user;
+      finalusers.map(async (row1) => {
+        const friendUsername = row1.user;
         const profileImageResponse = await pool.query(
           'SELECT profile FROM user1 WHERE user_name = $1',
           [friendUsername],
         );
-
         const profileImageBuffer = profileImageResponse.rows[0]?.profile;
-        const profileImage = profileImageBuffer
-          ? `data:image/png;base64,${profileImageBuffer.toString('base64')}`
-          : null;
-
         return {
+          id: row1.id,
           username: friendUsername,
-          profileImage,
+          profile: profileImageBuffer,
         };
       }),
     );
 
-    res.status(200).json({
-      success: true,
-      data: usersWithProfileImages,
-    });
+    const updatedTodosPromise = Promise.all(
+      usersWithProfileImages.map(
+        (todo) =>
+          new Promise((resolve, reject) => {
+            fs.readFile(todo.profile, (err, data) => {
+              if (err) {
+                console.error('Error reading image file:', err);
+                reject(err); // Reject the promise if there's an error
+                return;
+              }
+              const base64Image = Buffer.from(data).toString('base64');
+              resolve({ id: todo.id, username: todo.username, profile: base64Image });
+            });
+          }),
+      ),
+    );
+
+    updatedTodosPromise
+      .then((updatedTodos) => {
+        res.end(JSON.stringify(updatedTodos));
+        // Now you can use updatedTodos array with base64Image stored in profile
+      })
+      .catch((error) => {
+        res.end({ message: 'Error' });
+        // Handle error
+      });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -1807,8 +1863,22 @@ app.post('/insertcomment', async (req, res) => {
     const postOwner = postOwnerResponse.rows[0].user_name;
     if (reply_id === -1) {
       await pool.query(
-        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2) VALUES($1,$2,$3,$4,$5,$6)',
-        [username, postOwner, 'comment', id, 'yes', 'no'],
+        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2,minutes,hour,day,date,month,year,ampm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+        [
+          username,
+          postOwner,
+          'comment',
+          id,
+          'yes',
+          'no',
+          minutes,
+          hour,
+          day,
+          date,
+          month,
+          year,
+          ampm,
+        ],
       );
     } else {
       const response = await pool.query('SELECT username FROM comments WHERE comment_id=$1', [
@@ -1816,8 +1886,22 @@ app.post('/insertcomment', async (req, res) => {
       ]);
       console.log(response);
       await pool.query(
-        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2) VALUES($1,$2,$3,$4,$5,$6)',
-        [username, response.rows[0].username, 'commentreply', reply_id, 'yes', 'no'],
+        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2,minutes,hour,day,date,month,year,ampm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+        [
+          username,
+          response.rows[0].username,
+          'commentreply',
+          reply_id,
+          'yes',
+          'no',
+          minutes,
+          hour,
+          day,
+          date,
+          month,
+          year,
+          ampm,
+        ],
       );
     }
     res.json({ success: true, id: response1.rows[0].comment_id });
@@ -1842,7 +1926,7 @@ app.put('/fetchcommentbyid', async (req, res) => {
 app.put('/handlelikes', async (req, res) => {
   try {
     const { id, username } = req.body;
-
+    var date = new Date();
     // Check if the user has already liked the post
     const likeCheckResponse = await pool.query(
       'SELECT * FROM likes WHERE user_name=$1 AND post_id=$2',
@@ -1874,8 +1958,22 @@ app.put('/handlelikes', async (req, res) => {
 
       // Insert a notification for the post owner
       await pool.query(
-        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2) VALUES($1,$2,$3,$4,$5,$6)',
-        [username, postOwner, 'like', id, 'yes', 'no'],
+        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2,minutes,hour,day,date,month,year,ampm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+        [
+          username,
+          postOwner,
+          'like',
+          id,
+          'yes',
+          'no',
+          date.getMinutes() % 60,
+          date.getHours() % 60,
+          date.getDay(),
+          date.getDate(),
+          date.getMonth(),
+          date.getFullYear(),
+          date.getHours() > 12 ? 'PM' : 'AM',
+        ],
       );
 
       res.json({ success: true });
@@ -1909,6 +2007,7 @@ app.put('/handlecommentlikes', async (req, res) => {
     const { id, username } = req.body;
     console.log(id);
     // Check if the user has already liked the post
+    var date = new Date();
     const commentCheckResponse = await pool.query(
       'SELECT * FROM comment_like WHERE username=$1 AND comment_id=$2',
       [username, id],
@@ -1950,8 +2049,22 @@ app.put('/handlecommentlikes', async (req, res) => {
       const postOwner = postOwnerResponse.rows[0].username;
       // Insert a notification for the post owner
       await pool.query(
-        'INSERT INTO notifications (person1,person2,id,pid,seen1,seen2) VALUES($1,$2,$3,$4,$5,$6)',
-        [username, postOwner, 'commentlike', id, 'yes', 'no'],
+        'INSERT INTO notifications(person1,person2,id,pid,seen1,seen2,minutes,hour,day,date,month,year,ampm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+        [
+          username,
+          postOwner,
+          'commentlike',
+          id,
+          'yes',
+          'no',
+          date.getMinutes() % 60,
+          date.getHours() % 60,
+          date.getDay(),
+          date.getDate(),
+          date.getMonth(),
+          date.getFullYear(),
+          date.getHours() > 12 ? 'PM' : 'AM',
+        ],
       );
       console.log('Like id recieved');
       console.log(response.rows[0].id);
@@ -2036,6 +2149,7 @@ app.post('/deletecomment', async (req, res) => {
       id,
       -1,
     ]);
+    const response3 = await pool.query('DELETE FROM comment_like WHERE comment_id=$1', [id]);
     res.json({ success: true });
   } catch (err) {
     console.error(err.message);

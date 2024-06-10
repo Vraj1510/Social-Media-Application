@@ -149,10 +149,10 @@ function Notifications() {
         return notification;
       });
       console.log(updatedNotifications);
-      // await Promise.all([
-      //   deleteRequest1(notificationToUpdate),
-      //   socket.emit('notif', notificationToUpdate.person1),
-      // ]);
+      await Promise.all([
+        deleteRequest1(notificationToUpdate),
+        socket.emit('notif', notificationToUpdate.person1),
+      ]);
       // // Set the updated notifications state
       setNotifications([...updatedNotifications]);
       // // notifications=[...updatedNotifications];
@@ -194,10 +194,10 @@ function Notifications() {
   },[notifications])
   return (
     <div
-      className={`lg:h-[85%] h-[85%] space-y-4 ml-2 w-[94%] lg:w-[87.5%] mt-4 rounded-md mr-2.5`}
+      className={`lg:h-[88%] h-[85%]  ml-2 w-[94%] lg:w-[87.5%] mt-4 rounded-md mr-2.5`}
     >
       <div
-        className='flex flex-col flex-col-wrap lg:h-full md:h-full overflow-y-scroll space-y-2 '
+        className='flex flex-col flex-col-wrap lg:h-full md:h-full overflow-y-scroll space-y-2.5'
         style={{ height: 'auto', maxHeight: '100%' }}
       >
         {console.log(notifications)}
@@ -211,12 +211,12 @@ function Notifications() {
                     usernames: [notification.person2, notification.person1],
                   })
                 }
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
+                className='bg-stone-100 rounded-md'
               >
-                <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
+                <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                   <img
                     src={`data:image/png;base64,${notification.person2_profile}`}
-                    className='w-[3.5rem] h-[3.2rem] rounded-full'
+                    className='w-[3.5rem] h-[3.5rem] rounded-full'
                     alt={`${notification.person2}'s profile`}
                   ></img>
                   <div className='text-md mr-2 leading-none '>
@@ -225,35 +225,38 @@ function Notifications() {
                     accepted your follow request!
                   </div>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           } else if (notification.person2 === username && notification.id === 'follow') {
             // if (reqsent) {
+              
             return (
               <div
                 // key={notification.id} // Ensure each element has a unique key
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
+                className='bg-stone-100 rounded-md'
               >
-                <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
+                <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                   <img
                     src={`data:image/png;base64,${notification.person1_profile}`}
-                    className='w-[3.5rem] h-[3rem] rounded-full mr-2'
+                    className='w-[3.5rem] h-[3.5rem] rounded-full'
                     alt={`${notification.person1}'s profile`}
                   ></img>
-                  <span className='leading-none'>
+                  <span className='leading-none '>
                     <span>
                       <span className='font-medium text-lg mr-1'>{notification.person1}</span>
                       {''}
                       requested to follow you!
                     </span>{' '}
                     <button
-                      className='bg-cyan-950 text-white rounded-md w-[5rem] ml-1 h-[2rem] hover:bg-cyan-600 '
+                      className='bg-gray-800 text-md text-white rounded-md w-[4.3rem] ml-1 mt-0.5 h-[1.8rem] hover:bg-cyan-600 '
                       onClick={() => handleAcceptClick(notification)}
                     >
                       Accept
                     </button>
                   </span>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           } else if (notification.person2 === username && notification.id === 'following') {
@@ -266,22 +269,23 @@ function Notifications() {
                     usernames: [notification.person1, notification.person2],
                   })
                 }
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
-              >
+                className='bg-stone-100 rounded-md'
+               rounded-md>
                 <div className='flex'>
-                  <div className='flex flex-row pl-1 h-[4rem] items-center space-x-1'>
+                  <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                     <img
                       src={`data:image/png;base64,${notification.person1_profile}`}
-                      className='w-[3.5rem] h-[3.2rem] rounded-full'
+                      className='w-[3.5rem] h-[3.5rem] rounded-full'
                       alt={`${notification.person1}'s profile`}
                     ></img>
-                    <div className='text-md mr-2 leading-none '>
+                    <div className='text-md mr-2 leading-none'>
                       <span className='font-medium text-lg mr-1'>{notification.person1}</span>
                       {''}
                       started following you!
                     </div>
                   </div>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           } else if (notification.person2 === username && notification.id === 'like') {
@@ -294,13 +298,13 @@ function Notifications() {
                     usernames: [notification.person1, notification.person2],
                   })
                 }
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
-              >
+                className='bg-stone-100 rounded-md'
+               rounded-md>
                 <div className='flex'>
-                  <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
+                  <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                     <img
                       src={`data:image/png;base64,${notification.person1_profile}`}
-                      className='w-[3.5rem] h-[3.2rem] rounded-full'
+                      className='w-[3.5rem] h-[3.5rem] rounded-full'
                       alt={`${notification.person1}'s profile`}
                     ></img>
                     <div className='text-md mr-2 leading-none'>
@@ -310,6 +314,7 @@ function Notifications() {
                     </div>
                   </div>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           } else if (notification.person2 === username && notification.id === 'comment') {
@@ -321,13 +326,13 @@ function Notifications() {
                     usernames: [notification.person1, notification.person2],
                   })
                 }
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
-              >
+                className='bg-stone-100 rounded-md'
+               rounded-md>
                 <div className='flex'>
-                  <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
+                  <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                     <img
                       src={`data:image/png;base64,${notification.person1_profile}`}
-                      className='w-[3.5rem] h-[3.2rem] rounded-full'
+                      className='w-[3.5rem] h-[3.5rem] rounded-full'
                       alt={`${notification.person1}'s profile`}
                     ></img>
                     <div className='text-md mr-2 leading-none'>
@@ -337,6 +342,7 @@ function Notifications() {
                     </div>
                   </div>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           } else if (notification.person2 === username && notification.id === 'commentlike') {
@@ -349,13 +355,13 @@ function Notifications() {
                     usernames: [notification.person1, notification.person2],
                   })
                 }
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
-              >
+                className='bg-stone-100 rounded-md'
+               rounded-md>
                 <div className='flex'>
-                  <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
+                  <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                     <img
                       src={`data:image/png;base64,${notification.person1_profile}`}
-                      className='w-[3.5rem] h-[3.2rem] rounded-full'
+                      className='w-[3.5rem] h-[3.5rem] rounded-full'
                       alt={`${notification.person1}'s profile`}
                     ></img>
                     <div className='text-md mr-2 leading-none'>
@@ -365,6 +371,7 @@ function Notifications() {
                     </div>
                   </div>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           } else if (notification.person2 === username && notification.id === 'commentreply') {
@@ -377,13 +384,13 @@ function Notifications() {
                     usernames: [notification.person1, notification.person2],
                   })
                 }
-                className='bg-white rounded-md border-2 border-sky-300 shadow-sm'
-              >
-                <div className='flex'>
-                  <div className='flex flex-row ml-2 h-[4rem] items-center space-x-2'>
+                className='bg-stone-100 rounded-md'
+               rounded-md>
+               <div className='flex'>
+                  <div className='flex flex-row ml-2 h-[4.5rem] items-center space-x-2'>
                     <img
                       src={`data:image/png;base64,${notification.person1_profile}`}
-                      className='w-[3.5rem] h-[3.2rem] rounded-full'
+                      className='w-[3.5rem] h-[3.5rem] rounded-full'
                       alt={`${notification.person1}'s profile`}
                     ></img>
                     <div className='text-md mr-2 leading-none'>
@@ -393,6 +400,7 @@ function Notifications() {
                     </div>
                   </div>
                 </div>
+                <div className='w-full h-[2px] bg-gray-300'></div>
               </div>
             );
           }

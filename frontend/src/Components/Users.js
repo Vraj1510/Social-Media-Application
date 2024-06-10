@@ -47,22 +47,17 @@ const Users = ({ list }) => {
 
   return (
     <div className='w-full h-full'>
-      {/* Search bar */}
-      <input
+      {/* <input
         type='text'
         placeholder='Search users...'
         value={searchQuery}
         onChange={handleSearchChange}
         className='w-full p-2 mb-2 border border-gray-300 rounded-md'
       />
-
-      <div className='h-[2px] w-[92%] ml-3 -mt-3 mb-2 bg-stone-300'></div>
-
-      {/* Display filtered list of users */}
       {filteredList.map((user) => (
         <div
           key={user.user_name}
-          className='flex mx-3 my-1.5 border-2 border-sky-300 rounded-md bg-white p-2 items-center'
+          className='flex mx-3 my-2 shadow-md border rounded-md bg-white p-2 items-center'
         >
           <img
             src={`data:image/png;base64,${user.profile}`}
@@ -71,7 +66,57 @@ const Users = ({ list }) => {
           />
           <div className='ml-3 w-full text-xl font-light'>{user.user_name}</div>
         </div>
-      ))}
+      ))} */}
+      <div
+        className='flex flex-col flex-col-wrap lg:h-full md:h-full overflow-y-scroll space-y-6'
+        style={{ height: 'auto', maxHeight: '100%' }}
+      >
+        <div className='flex w-full max-w-sm items-center space-x-1'>
+          <input
+            className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+            placeholder='Search'
+            type='search'
+          />
+          <button className='inline-flex text-white bg-black items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-12'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='h-4 w-4'
+            >
+              <circle cx='11' cy='11' r='8' />
+              <path d='m21 21-4.3-4.3' />
+            </svg>
+            <span className='sr-only'>Search</span>
+          </button>
+        </div>
+        <div className='space-y-2.5'>
+          {filteredList.map((user) => (
+            <div className='flex flex-col'>
+              <div
+                key={user.user_name}
+                className='flex flex-row w-full bg-stone-100 rounded-md p-2 items-center justify-between'
+              >
+                <div className='flex space-x-2'>
+                  <img
+                    src={`data:image/png;base64,${user.profile}`}
+                    className='h-[3rem] w-[3rem] rounded-full'
+                    alt={`${user.user_name}'s profile`}
+                  />
+                  <div className='text-lg py-3'>{user.user_name}</div>
+                </div>
+              </div>
+              <div className='w-full h-[2px] bg-gray-300'></div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

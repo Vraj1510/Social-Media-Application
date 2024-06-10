@@ -27,7 +27,7 @@ const PostDisplay = ({ post }) => {
     fetchprofile();
   }, [post]);
   return (
-    <div className='flex flex-col bg-white border w-[154%] p-2 rounded-md'>
+    <div className='flex flex-col w-[100%]'>
       <div className='flex space-x-1.5 items-center'>
         <img src={`data:image/png;base64,${profile}`} className='h-9 w-9 rounded-full'></img>
         <div className='text-xl font-light text-sky-950'>{mypost.user_name}</div>
@@ -35,9 +35,9 @@ const PostDisplay = ({ post }) => {
       <div className='h-[1px] bg-gray-300 mt-1.5 mb-2'></div>
       <img
         src={`data:image/png;base64,${post.pictures[0]}`}
-        className='h-48 w-52 ml-1.5 -mr-10'
+        className='h-72 w-72'
       ></img>
-      <div className='text-md mt-2 ml-1 text-sky-950'>{mypost.caption}</div>
+      <div className='text-md mt-1 ml-1 text-sky-950'>{mypost.caption}</div>
     </div>
   );
 };

@@ -1,22 +1,11 @@
 import React from 'react';
-import followingimg from '../Images/following.png';
-import followersimg from '../Images/followers.png';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import search from '../Images/search.png';
-import profile from '../Images/profile3.png';
-import home from '../Images/home.svg';
-import logoImg from '../Images/logo.jpeg';
 import Notifications from './Notifications';
 import Following from './Following';
 import Followers from './Followers';
-import io from 'socket.io-client';
-import img1 from '../Images/profile1.png';
-import logout1 from '../Images/logout.png';
-import DashBoardPosts from './DashboardPosts';
-import PYMK from './PYMK';
 import { socket } from './DashBoard';
 import { useIndex } from './IndexContext';
 
@@ -33,13 +22,11 @@ function Sidebar() {
   // const [index, setindex] = useState(index);
   const { index } = useIndex();
   console.log(index);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isPopupOpenf, setIsPopupOpenf] = useState(false);
-  const [isPopupOpenn, setIsPopupOpenn] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [imageUrl, setImageUrl] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [count, setCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const [chatcount, setchatcount] = useState(0);
   const navigate3 = useNavigate();
   const navigateToDashboard = (state) => {
@@ -121,6 +108,7 @@ function Sidebar() {
     setchatcount(count);
     console.log(count);
   };
+
   const logout = async () => {
     try {
       const response = await fetch('http://localhost:3001/logout', {
@@ -143,13 +131,19 @@ function Sidebar() {
     }
   };
 
-  const handleChange = (value) => {
-    setInput(value);
-    const filteredUsers = list.filter((user) =>
-      user.user_name.toLowerCase().includes(value.toLowerCase()),
+  // const handleChange = (value) => {
+  //   setInput(value);
+  //   const filteredUsers = list.filter((user) =>
+  //     user.user_name.toLowerCase().includes(value.toLowerCase()),
+  //   );
+  //   setFilteredUsers(filteredUsers);
+  // };
+  useEffect(() => {
+    const filteredList = list.filter((follower) =>
+      follower.user_name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-    setFilteredUsers(filteredUsers);
-  };
+    setFilteredUsers(filteredList);
+  }, [searchQuery, list]);
 
   const fetchProfileImage = async () => {
     try {
@@ -230,11 +224,11 @@ function Sidebar() {
   const navigatetologin = () => {
     navigate('/auth');
   };
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth > 768);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallScreen(window.innerWidth < 768);
+      setIsSmallScreen(window.innerWidth <= 768);
       if (isSmallScreen) {
       }
     };
@@ -282,180 +276,214 @@ function Sidebar() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [index, isLargeScreen]);
-  if ((index === 0 || index === 1) && isLargeScreen) {
+  if ((index === 0 || index === 1 || index == 6) && isLargeScreen) {
     return (
-      <div className='flex flex-col mb-4 mt-2 lg:h-[45rem] border-2 border-orange-200 shadow-2xl items-center space-y-1 mx-2 p-7 px-5 bg-orange-50 rounded-lg'>
-        <div className='flex flex-col items-center space-y-2 mb-8'>
-          <img
-            src={`data:image/png;base64,${imageUrl}`}
-            className='rounded-full w-[90px] h-[90px]'
-          ></img>
-          <div className='flex flex-col text-4xl items-center'>{username}</div>
-        </div>
-        <div className='flex flex-col w-full'>
-          <div
-            onClick={() => {
-              updateIndex(0);
-              navigateToDashboard({ state: { username } });
-            }}
-            className={`flex flex-col cursor-pointer ${
-              index === 0 ? 'bg-orange-100' : ''
-            } hover:bg-orange-100 pt-2`}
-          >
-            <div className='flex flex-row ml-2 items-center mb-1 space-x-6'>
-              <img src={home} className='w-11 h-11 rounded-full'></img>
-              <div className='text-xl mt-2 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2'>
-                Home
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
+      <div className='flex items-center border rounded-md shadow-xl m-2 h-[97.5%] w-[25%] lg:w-[17%] md:w-[25%]'>
+        {' '}
+        <div className='space-y-10 w-full -mt-1 px-2 bg-white'>
+          <div className='flex flex-col items-center h-1/6 bg-white'>
+            <img
+              src={`data:image/png;base64,${imageUrl}`}
+              width='80'
+              height='80'
+              alt='Avatar'
+              className='rounded-full'
+              style={{ aspectRatio: '40 / 40', objectFit: 'cover' }}
+            />
+            <div className='font-normal mt-2 text-3xl'>{username}</div>
           </div>
-
-          <div
-            onClick={() => {
-              updateIndex(1);
-              navigatetoprofile({ state: { username } });
-            }}
-            className={`flex flex-col cursor-pointer ${
-              index === 1 ? 'bg-orange-100' : ''
-            } hover:bg-orange-100 pt-2 `}
-          >
-            <div className='flex flex-row items-center mb-1 ml-2 space-x-7'>
-              <img src={profile} className='w-10 h-10 rounded-full'></img>
-              <div className='text-xl mt-1 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2'>
-                Profile
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
-          </div>
-          <div
-            onClick={async () => {
-              updateIndex(2);
-              await seenotifications();
-            }}
-            className='flex flex-col cursor-pointer hover:bg-orange-100 pt-3'
-          >
-            <div className='flex flex-row items-center -mt-2 -mb-2 ml-2 space-x-7'>
-              <div className='relative items-center'>
+          <div className='flex-1 h-3/5 overflow-auto py-2 justify-evenly'>
+            <nav class='grid items-start h-5/6 mt-4 px-4 space-y-1 text-sm font-medium'>
+              <a
+                class={`flex items-center font-normal text-lg gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 ${
+                  index == 0 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                } transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50`}
+                href='#'
+                onClick={() => {
+                  updateIndex(0);
+                  navigateToDashboard({ state: { username } });
+                }}
+              >
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
                   viewBox='0 0 24 24'
-                  fill='#083344'
-                  className='w-10 h-16 rounded-full'
-                  style={{ zIndex: 1 }}
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round' // Use camelCase instead of kebab-case
                 >
-                  <path
-                    fillRule='evenodd'
-                    d='M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z'
-                    clipRule='evenodd'
-                  />
+                  <path d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'></path>
+                  <polyline points='9 22 9 12 15 12 15 22'></polyline>
                 </svg>
-                {count > 0 && index !== 2 && (
-                  <div
-                    className='absolute top-0 left-0 rounded-full bg-red-700 mx-3 ml-4 -mb-3 px-1.5 text-sm text-white'
-                    style={{ zIndex: 10 }}
-                  >
-                    {count}
-                  </div>
-                )}
-              </div>
-
-              <div className='text-xl mt-1 hover:underline hover:underline-cyan-800 hover:text-cyan-800  hover:underline-offset-2'>
-                Notifications
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
-          </div>
-
-          <div
-            onClick={() => {
-              updateIndex(3);
-              updateIndex(3);
-            }}
-            className='flex flex-col cursor-pointer hover:bg-orange-100 pt-1'
-          >
-            <div className='flex flex-row items-center mb-1 ml-2 space-x-6'>
-              <img src={followersimg} className='w-11 h-11 mt-2 rounded-full'></img>
-              <div className='text-xl mt-4 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2'>
-                Followers
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
-          </div>
-          <div
-            onClick={() => {
-              updateIndex(4);
-              updateIndex(4);
-            }}
-            className='flex flex-col cursor-pointer hover:bg-orange-100 pt-1'
-          >
-            <div className='flex flex-row items-center mb-1 ml-2 space-x-6'>
-              <img src={followingimg} className='w-11 h-11 mt-2 rounded-full'></img>
-              <div className='text-xl mt-4 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2'>
-                Following
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
-          </div>
-
-          <div
-            onClick={() => {
-              updateIndex(5);
-              updateIndex(5);
-            }}
-            className='flex flex-col cursor-pointer hover:bg-orange-100 pt-1'
-          >
-            <div className='flex flex-row items-center mb-1 ml-2 space-x-6'>
-              <img src={search} className='w-11 h-11 mt-2 rounded-full'></img>
-              <div className='text-xl mt-4 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2'>
-                Search
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
-          </div>
-          <div className='flex flex-col cursor-pointer hover:bg-orange-100 pt-1'>
-            <div className='flex flex-row items-center mb-1 ml-2 space-x-6'>
-              <div className='relative items-center'>
+                <div className=''>Home</div>
+              </a>
+              <a
+                class={`flex items-center font-normal  text-lg gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 ${
+                  index == 1 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                } transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50`}
+                href='#'
+                onClick={() => {
+                  updateIndex(1);
+                  navigatetoprofile({ state: { username } });
+                }}
+              >
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
                   viewBox='0 0 24 24'
-                  fill='#083344'
-                  className='w-11 h-11 mt-2 rounded-full'
-                  onClick={() => navigatetochat()}
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round'
                 >
-                  <path
-                    fillRule='evenodd'
-                    d='M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z'
-                    clipRule='evenodd'
-                  />
+                  <path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path>
+                  <circle cx='12' cy='7' r='4'></circle>
                 </svg>
+                <div className=''>Profile</div>
+              </a>
+              <a
+                class='flex items-center font-normal text-lg p-2 gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 text-gray-600 transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50'
+                href='#'
+                onClick={async () => {
+                  updateIndex(2);
+                  await seenotifications();
+                }}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round'
+                >
+                  <path d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'></path>
+                  <path d='M10.3 21a1.94 1.94 0 0 0 3.4 0'></path>
+                </svg>
+
+                <div className=''>Notifications</div>
+
+                {
+                  count > 0 && index !== 2 && (
+                    <div class='whitespace-nowrap border mt-1 bg-black text-white text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full'>
+                      {count}
+                    </div>
+                  )
+                  // <div className='text-lg text-black'>{count}</div>
+                }
+              </a>
+              <a
+                class='flex items-center font-normal text-lg p-2 gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 text-gray-600 transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50'
+                href='#'
+                onClick={() => {
+                  updateIndex(3);
+                }}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round'
+                >
+                  <path d='M14 19a6 6 0 0 0-12 0'></path>
+                  <circle cx='8' cy='9' r='4'></circle>
+                  <path d='M22 19a6 6 0 0 0-6-6 4 4 0 1 0 0-8'></path>
+                </svg>
+                <div className=''>Followers</div>
+              </a>
+              <a
+                class='flex items-center font-normal text-lg p-2 gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 text-gray-600 transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50'
+                href='#'
+                onClick={() => {
+                  updateIndex(4);
+                }}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round'
+                >
+                  <path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'></path>
+                  <circle cx='9' cy='7' r='4'></circle>
+                  <line x1='19' x2='19' y1='8' y2='14'></line>
+                  <line x1='22' x2='16' y1='11' y2='11'></line>
+                </svg>
+                <div className=''>Following</div>
+              </a>
+              <a
+                class='flex items-center font-normal text-lg p-2 gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 text-gray-600 transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50'
+                href='#'
+                onClick={() => {
+                  updateIndex(5);
+                }}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round'
+                >
+                  <circle cx='11' cy='11' r='8'></circle>
+                  <path d='m21 21-4.3-4.3'></path>
+                </svg>
+                <div className=''>Search</div>
+              </a>
+              <a
+                class='flex items-center font-normal text-lg p-2 gap-5 hover:bg-gray-100 rounded-lg px-3 py-3 text-gray-600 transition-all hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50'
+                href='#'
+                onClick={() => navigatetochat()}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-6 w-6' // Adjust the size of the icon using tailwindcss classes
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2' // Use strokeWidth instead of stroke-width
+                  strokeLinecap='round' // Use camelCase instead of kebab-case
+                  strokeLinejoin='round'
+                >
+                  <path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'></path>
+                </svg>
+                <div className=''>Chat</div>
                 {chatcount > 0 && (
-                  <div
-                    className='absolute top-0 left-2 rounded-full bg-red-700 mx-3 ml-4 -mb-3 px-1.5 text-sm text-white'
-                    style={{ zIndex: 10 }}
-                  >
+                  <div class='whitespace-nowrap bg-black text-white border text-sm mt-1 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full'>
                     {chatcount}
                   </div>
                 )}
-              </div>
-              <div className='text-xl mt-4 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2'>
-                Chat
-              </div>
-            </div>
-            <div className='h-[2px] bg-gray-300 w-full '></div>
+              </a>
+            </nav>
           </div>
-        </div>
-        <div className='flex flex-col -ml-1 w-full items-center'>
-          <button
+          <div
             onClick={async () => {
               await logout();
             }}
-            className='bg-cyan-800 text-white mt-6 text-lg w-5/6 py-2 rounded-xl'
+            class='flex text-white text-lg font-normal items-center bg-black justify-center py-2 rounded-md mx-5'
           >
-            Logout
-          </button>
-          {/* <div className='h-[2px] bg-gray-300 w-full '></div> */}
+            <a class='' href='#'>
+              Logout
+            </a>
+          </div>
         </div>
+        {/* <div className='h-[96%] bg-gray-300 ml-1 w-[1.5px]'></div> */}
       </div>
     );
   } else {
@@ -466,263 +494,394 @@ function Sidebar() {
         <div
           className={`flex ${isSmallScreen ? 'flex-col' : 'flex-row'} ${
             index >= 2 ? 'h-full' : 'h-auto'
-          } lg:my-2 md:mt-0 lg:mt-1 lg:-mb-0.5 md:-mb-0 lg:ml-1.5 md:my-1 md:ml-0.5`}
+          } lg:my-2 md:mt-0 lg:mt-1 lg:-mb-0.5 md:-mb-0 lg:mx-0 md:my-1 md:ml-0.5`}
         >
           {isSmallScreen && (
-            <div className={`w-screen ${index >= 2 ? 'h-[92.5%]' : ''}`}>
+            <div className={`w-screen ${index >= 2 ? 'h-[94%]' : ''}`}>
               {index === 2 && isSmallScreen && (
-                <div className='w-[97%] h-full'>
-                  <div className='ml-1.5 mt-0.5 w-full bg-orange-50 h-[100%] border-2 border-orange-200 pr-4 rounded-md'>
+                <div className='flex w-[105%] h-full'>
+                  <div className='ml-1.5 mt-0.5 w-full h-[100%] pr-4 rounded-md'>
                     <div className='flex flex-col h-full items-start relative -mr-4 mb-2 w-full'>
-                      <div className='ml-5 mt-7 text-3xl text-cyan-950'>Notifications</div>
+                      <div className='ml-3 mt-4 text-3xl text-cyan-950'>Notifications</div>
+                      <div className='w-[93%] h-[1.5px] ml-2.5 mt-1.5 bg-gray-200'></div>
                       <Notifications username={username}></Notifications>
                     </div>
                   </div>
                 </div>
               )}
               {index === 3 && isSmallScreen && (
-                <div className='w-[97%] h-full'>
-                  <div className='ml-1.5 mt-0.5 w-full bg-orange-50 h-[100%] border-2 border-orange-200 pr-4 rounded-md'>
+                <div className='flex w-[105%] h-full'>
+                  <div className='ml-1.5 mt-0.5 w-full h-[100%] pr-4 rounded-md'>
                     <div className='flex flex-col h-full items-start relative -mr-4 mb-2 w-full'>
-                      <div className='ml-5 mt-7 text-3xl text-cyan-950'>Followers</div>
+                      <div className='ml-3 mt-4 text-3xl text-cyan-950'>Followers</div>
+                      <div className='w-[93%] h-[1.5px] ml-2.5 mt-1.5 bg-gray-200'></div>
                       <Following username={username}></Following>
                     </div>
                   </div>
                 </div>
               )}
               {index === 4 && isSmallScreen && (
-                <div className='w-[97%] h-full' style={{ height: '100%' }}>
-                  <div className='ml-1.5 mt-0.5 w-full bg-orange-50 h-[100%] border-2 border-orange-200 pr-4 rounded-md'>
+                <div className='flex w-[105%] h-full' style={{ height: '100%' }}>
+                  <div className='ml-1.5 mt-0.5 w-full h-[100%] pr-4 rounded-md'>
                     <div className='flex flex-col h-full items-start relative -mr-4 mb-2 w-full'>
-                      <div className='ml-5 mt-7 text-3xl text-cyan-950'>Following</div>
+                      <div className='ml-3 mt-4 text-3xl text-cyan-950'>Following</div>
+                      <div className='w-[93%] h-[1.5px] ml-2.5 mt-1.5 bg-gray-200'></div>
                       <Followers username={username}></Followers>
                     </div>
                   </div>
                 </div>
               )}
               {index === 5 && isSmallScreen && (
-                <div className='w-[97%] mt-0.5 h-full' style={{ height: '100%' }}>
-                  <div className='ml-1.5 w-full bg-orange-50 h-[100%] border-2 border-orange-200 pr-4 rounded-md'>
-                    <div className='flex flex-col h-full items-start space-y-3 relative -mr-4 mb-2 w-full'>
-                      <div className='ml-5 mt-7 text-3xl text-cyan-950'>Explore</div>
-                      <input
-                        type='text'
-                        className='rounded-md border-2 border-sky-300 w-[92%] ml-5 bg-white text-lg py-2 px-2 mr-4 placeholder-black outline-none '
-                        placeholder='Search..'
-                        value={input}
-                        onChange={(e) => handleChange(e.target.value)}
-                      />
-                      <ul className='rounded-md w-[94%] ml-5 space-y-4'>
-                        <div className='flex flex-col overflow-y-scroll space-y-2 mr-2'>
-                          {console.log(list)}
-                          {(input === '' ? list : filteredUsers).map((user) => (
-                            <li
-                              key={user.user_name}
-                              onClick={() =>
-                                navigatetoprofile1({ usernames: [user.user_name, username] })
-                              }
-                              className='flex flex-row bg-white w-full border-2 border-sky-300 shadow-sm rounded-md cursor-pointer py-1.5 px-2 space-x-2'
+                <div className='flex w-[105%] h-full' style={{ height: '100%' }}>
+                  <div className='ml-1.5 mt-0.5 w-full h-[100%] pr-4 rounded-md'>
+                    <div className='ml-2.5 mt-4 -mb-2 text-3xl text-black'>Search</div>
+                    <div className='w-[93%] h-[1.5px] ml-2.5 mt-3 bg-gray-200'></div>
+                    <div
+                      className={`lg:h-[85%] h-[85%]  ml-2 w-[94%] lg:w-[87.5%] mt-3 rounded-md mr-2.5`}
+                    >
+                      <div
+                        className='flex flex-col flex-col-wrap lg:h-full md:h-full overflow-y-scroll space-y-6'
+                        style={{ height: 'auto', maxHeight: '100%' }}
+                      >
+                        <div className='flex w-full items-center space-x-1 mt-1'>
+                          <input
+                            className='flex h-10 w-full focus:outline-none  rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
+                            placeholder='Search'
+                            type='search'
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                          />
+                          <button className='inline-flex text-white bg-black items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-12'>
+                            <svg
+                              xmlns='http://www.w3.org/2000/svg'
+                              width='24'
+                              height='24'
+                              viewBox='0 0 24 24'
+                              fill='none'
+                              stroke='currentColor'
+                              strokeWidth='2'
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              className='h-4 w-4'
                             >
-                              <img
-                                src={`data:image/png;base64,${user.profile}`}
-                                className='h-[3rem] w-[3rem] rounded-full'
-                                alt={user.user_name}
-                              />
-                              <div className='text py-3'>{user.user_name}</div>
-                            </li>
+                              <circle cx='11' cy='11' r='8' />
+                              <path d='m21 21-4.3-4.3' />
+                            </svg>
+                            <span className='sr-only'>Search</span>
+                          </button>
+                        </div>
+
+                        <div className='space-y-2.5'>
+                          {(searchQuery === '' ? list : filteredUsers).map((user) => (
+                            <div className='flex flex-col'>
+                              <div
+                                key={user.user_name}
+                                onClick={() =>
+                                  navigatetoprofile1({ usernames: [user.user_name, username] })
+                                }
+                                className='flex flex-row w-full bg-stone-100 rounded-md p-2 items-center justify-between'
+                              >
+                                <div className='flex space-x-2'>
+                                  <img
+                                    src={`data:image/png;base64,${user.profile}`}
+                                    className='h-[3rem] w-[3rem] rounded-full'
+                                    alt={`${user.user_name}'s profile`}
+                                  />
+                                  <div className='text-lg py-3'>{user.user_name}</div>
+                                </div>
+                              </div>
+                              <div className='w-full h-[2px] bg-gray-300'></div>
+                            </div>
                           ))}
                         </div>
-                        <div className='w-full h-[2px] bg-gray-300'></div>
-                      </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
+              )}
+              {isSmallScreen && index >= 2 && index < 6 && (
+                <div className='w-full h-[1px] -mt-3.5 bg-gray-300'></div>
               )}
             </div>
           )}
           <div
             className={`flex${isSmallScreen ? 'h-[3rem] w-[97%] ml-1.5' : ''} ${
-              isSmallScreen && index >= 2 ? 'absolute bottom-1 left-0 h-[3rem] mt-1.5' : ''
-            } flex-col md:px-1.5 lg:px-3 py-2 md:-mb-0 lg:mt-1 md:w-auto lg:w-auto md:mt-1 md:h-[99%] lg:h-[45rem] border-2 border-orange-200 shadow-md items-center lg:space-y-12 md:space-y-12 bg-orange-50 rounded-md `}
+              isSmallScreen && index >= 2
+                ? 'flex items-center absolute bottom-4 left-0 h-[3rem]'
+                : ''
+            } ${
+              isSmallScreen && index <= 2 ? '' : ''
+            }flex-col md:px-1.5 lg:px-3 py-2 md:-mb-0 lg:mt-1 md:w-auto lg:w-auto md:mt-1 md:h-[99%] lg:h-[99%] shadow- items-center lg:space-y-12 md:space-y-12  rounded-md `}
           >
             {!isSmallScreen && (
-              <div className='flex flex-col lg:mt-4 md:mt-4 items-center'>
+              <div className='flex flex-col items-center h-1/6 mt-1 bg-white'>
                 <img
                   src={`data:image/png;base64,${imageUrl}`}
-                  className='rounded-full md:w-14 md:h-14 lg:w-full lg:h-12 w-9 h-8'
-                ></img>
+                  alt='Avatar'
+                  width='60'
+                  height='60'
+                  className='rounded-full'
+                  style={{ aspectRatio: '40 / 40', objectFit: 'cover' }}
+                />
               </div>
             )}
+
+            {isSmallScreen && <div className='w-screen h-[1px] mb-2 bg-gray-300'></div>}
             <div
               className={`flex ${
                 isSmallScreen ? 'flex-row h-full' : 'flex-col'
-              } items-center justify-between lg:gap-4 md:gap-4 w-full`}
+              } items-center justify-between lg:gap-12 md:gap-12 w-full`}
             >
-              <div
-                onClick={() => {
-                  navigateToDashboard({ state: { username } });
-                  updateIndex(0);
-                  updateIndex(0);
-                }}
-                className={`flex flex-col justify-center items-center cursor-pointer ${
-                  index === 0 ? 'bg-orange-100' : ''
-                } hover:bg-orange-100 md:w-12 h:w-12 w-10 lg:pt-2 md:pt-2`}
+              <nav
+                className={`${
+                  isSmallScreen
+                    ? 'flex h-full w-full justify-between items-center -mt-6 -mb-3'
+                    : 'grid items-start'
+                } ${
+                  index >= 2 && index < 6 ? '-mb-4' : '-mt-4'
+                }  h-5/6 py-3 px-2 space-y-3 text-sm font-medium`}
               >
-                <img
-                  src={home}
-                  className=' md:w-10 md:h-10 lg:w-10 lg:h-10 w-[1.7rem] h-[1.7rem] rounded-full'
-                ></img>
-                <div className='h-[2px] bg-gray-300 sm:w-12 md:w-12 h:w-12 w-9'></div>
-              </div>
-
-              <div
-                onClick={() => {
-                  navigatetoprofile({ state: { username } });
-                  updateIndex(1);
-                  updateIndex(1);
-                }}
-                className={`flex flex-col items-center cursor-pointer ${
-                  index === 1 ? 'bg-orange-100' : ''
-                } hover:bg-orange-100 md:w-12 h:w-12 w-10 lg:pt-3 md:pt-3`}
-              >
-                <img
-                  src={profile}
-                  className='md:w-10 md:h-10 lg:w-10 lg:h-10 w-[1.7rem] h-[1.7rem] rounded-full'
-                ></img>
-                <div className='h-[2px] bg-gray-300 md:w-12 h:w-12 w-9'></div>
-              </div>
-              <div
-                onClick={async () => {
-                  updateIndex(2);
-                  updateIndex(2);
-                  await seenotifications();
-                }}
-                className={`flex flex-col items-center cursor-pointer ${
-                  index === 2 ? 'bg-orange-100' : ''
-                } hover:bg-orange-100 md:w-12 h:w-12 w-10 lg:pt-2 md:pt-2`}
-              >
-                <div className='relative items-center'>
+                <a
+                  class={` flex items-center justify-center font-normal mt-3.5 text-lg gap-3  hover:bg-gray-100 rounded-lg px-3 py-2 ${
+                    index == 0 ? 'bg-gray-100 text-gray-950 ' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={() => {
+                    updateIndex(0);
+                    navigateToDashboard({ state: { username } });
+                  }}
+                >
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
+                    className='h-7 w-7' // Adjust the size of the icon using tailwindcss classes
                     viewBox='0 0 24 24'
-                    fill='#083344'
-                    className=' md:w-10 md:h-10 lg:w-10 lg:h-10 w-[1.7rem] h-[1.7rem] rounded-full'
-                    style={{ zIndex: 1 }}
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2' // Use strokeWidth instead of stroke-width
+                    strokeLinecap='round' // Use camelCase instead of kebab-case
+                    strokeLinejoin='round' // Use camelCase instead of kebab-case
                   >
-                    <path
-                      fillRule='evenodd'
-                      d='M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z'
-                      clipRule='evenodd'
-                    />
+                    <path d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'></path>
+                    <polyline points='9 22 9 12 15 12 15 22'></polyline>
                   </svg>
+                </a>
+                <a
+                  class={`flex items-center justify-center font-normal -mt-1 text-lg gap-3  hover:bg-gray-100 rounded-lg  px-3 py-2 ${
+                    index == 1 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={() => {
+                    updateIndex(1);
+                    navigatetoprofile({ state: { username } });
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    className='w-7 h-7'
+                  >
+                    <path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path>
+                    <circle cx='12' cy='7' r='4'></circle>
+                  </svg>
+                </a>
+                <a
+                  class={`flex items-center justify-center font-normal -mt-0.5 text-lg gap-3  hover:bg-gray-100 rounded-lg  px-3 py-2 ${
+                    index == 2 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={async () => {
+                    updateIndex(2);
+                    await seenotifications();
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-7 w-7'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    // class='h-4 w-4'
+                  >
+                    <path d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'></path>
+                    <path d='M10.3 21a1.94 1.94 0 0 0 3.4 0'></path>
+                  </svg>
+
                   {count > 0 && index !== 2 && (
-                    <div
-                      className='absolute top-0 left-0 rounded-full bg-red-700 mx-3 ml-4 -mb-3 px-1.5 text-sm text-white'
-                      style={{ zIndex: 10 }}
-                    >
+                    <div class='whitespace-nowrap border mt-1 bg-black text-white text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full'>
                       {count}
                     </div>
                   )}
-                </div>
-                <div className='h-[2px] bg-gray-300 md:w-12 h:w-12 w-9'></div>
-              </div>
-
-              <div
-                onClick={() => {
-                  updateIndex(3);
-                  updateIndex(3);
-                }}
-                className={`flex flex-col items-center cursor-pointer ${
-                  index === 3 ? 'bg-orange-100' : ''
-                } hover:bg-orange-100 md:w-12 h:w-12 w-10 lg:pt-2 md:pt-2`}
-              >
-                <img
-                  src={followersimg}
-                  className=' md:w-10 md:h-10 lg:w-10 lg:h-10 w-[1.7rem] h-[1.7rem] rounded-full'
-                ></img>
-                <div className='h-[2px] bg-gray-300 md:w-12 h:w-12 w-9'></div>
-              </div>
-              <div
-                onClick={() => {
-                  updateIndex(4);
-                  updateIndex(4);
-                }}
-                className={`flex flex-col items-center ${
-                  index === 4 ? 'bg-orange-100' : ''
-                } cursor-pointer hover:bg-orange-100 md:w-12 h:w-12 w-10 lg:pt-2 md:pt-2`}
-              >
-                <img
-                  src={followingimg}
-                  className='md:w-10 md:h-10 lg:w-10 lg:h-10 w-[1.7rem] h-[1.7rem] rounded-full'
-                ></img>
-                <div className='h-[2px] bg-gray-300 md:w-12 h:w-12 w-9'></div>
-              </div>
-
-              <div
-                onClick={() => {
-                  updateIndex(5);
-                  updateIndex(5);
-                }}
-                className={`flex flex-col items-center ${
-                  index === 5 ? 'bg-orange-100' : ''
-                } cursor-pointer hover:bg-orange-100 md:w-12 h:w-12 w-10 lg:pt-2 md:pt-2`}
-              >
-                <img
-                  src={search}
-                  className='md:w-10 md:h-10 lg:w-10 lg:h-10 w-7 h-7 rounded-full'
-                ></img>
-
-                <div className='h-[2px] bg-gray-300 md:w-12 h:w-12 w-9'></div>
-              </div>
-              <div className='flex flex-col cursor-pointer items-center hover:bg-orange-100 lg:pt-2 md:pt-2'>
-                <div className='relative items-center'>
+                </a>
+                <a
+                  class={`flex items-center justify-center font-normal -mt-0.5 text-lg gap-3  hover:bg-gray-100 rounded-lg  px-3 py-2 ${
+                    index == 3 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={() => {
+                    updateIndex(3);
+                  }}
+                >
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
+                    className='h-7 w-7'
                     viewBox='0 0 24 24'
-                    fill='#083344'
-                    className='md:w-10 md:h-10 lg:w-10 lg:h-10 w-7 h-7 rounded-full'
-                    onClick={() => navigatetochat()}
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    // class='h-4 w-4'
                   >
-                    <path
-                      fillRule='evenodd'
-                      d='M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z'
-                      clipRule='evenodd'
-                    />
+                    <path d='M14 19a6 6 0 0 0-12 0'></path>
+                    <circle cx='8' cy='9' r='4'></circle>
+                    <path d='M22 19a6 6 0 0 0-6-6 4 4 0 1 0 0-8'></path>
                   </svg>
-                  {/* { */}
+                </a>
+                <a
+                  class={`flex items-center justify-center font-normal -mt-0.5 text-lg gap-3  hover:bg-gray-100 rounded-lg  px-3 py-2 ${
+                    index == 4 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={() => {
+                    updateIndex(4);
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    class='h-7 w-7 '
+                  >
+                    <path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'></path>
+                    <circle cx='9' cy='7' r='4'></circle>
+                    <line x1='19' x2='19' y1='8' y2='14'></line>
+                    <line x1='22' x2='16' y1='11' y2='11'></line>
+                  </svg>
+                </a>
+                <a
+                  class={`flex items-center justify-center font-normal -mt-0.5 text-lg gap-3  hover:bg-gray-100 rounded-lg  px-3 py-2 ${
+                    index == 5 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={() => {
+                    updateIndex(5);
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-7 w-7'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    // class='h-4 w-4'
+                  >
+                    <circle cx='11' cy='11' r='8'></circle>
+                    <path d='m21 21-4.3-4.3'></path>
+                  </svg>
+                </a>
+                <a
+                  class={`flex items-center font-normal  -mt-0.5 text-lg gap-3  hover:bg-gray-100 rounded-lg  px-3 py-2 ${
+                    index == 6 ? 'bg-gray-100 text-gray-950' : 'text-gray-600'
+                  }  transition-all hover:text-gray-950 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50`}
+                  href='#'
+                  onClick={() => navigatetochat()}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-7 w-7'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    // class='h-4 w-4'
+                  >
+                    <path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'></path>
+                  </svg>
                   {chatcount > 0 && (
-                    <div
-                      className='absolute -top-2 left-2 rounded-full bg-red-700 mx-3 ml-4 -mb-3 px-1.5 text-sm text-white'
-                      style={{ zIndex: 10 }}
-                    >
+                    <div class='whitespace-nowrap bg-black text-white border text-sm mt-1 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80 ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full'>
                       {chatcount}
                     </div>
                   )}
-                </div>
-                {/* )} */}
-                <div className='h-[2px] bg-gray-300 md:w-12 h:w-12 w-9'></div>
-              </div>
+                </a>
+              </nav>
               {!isSmallScreen && (
-                <div className='flex flex-col space-y-2.5 mt-2'>
-                  <img
-                    onClick={() => {
-                      logout();
-                    }}
-                    src={logout1}
-                    className='sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-12 lg:h-12 w-10 h-10 text-white text-md -ml-1 mt-10 rounded-xl'
-                  ></img>
-                  <div className='h-[2px] bg-gray-300 w-full'></div>
-                </div>
+                <svg
+                  onClick={async () => {
+                    await logout();
+                  }}
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-12 w-12 mt-12 p-2 transform hover:bg-gray-100 rotate-180 text-gray-600'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  stroke-width='2'
+                  stroke-linecap='round'
+                  stroke-linejoin='round'
+                  // class='h-4 w-4 transform rotate-180'
+                >
+                  <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'></path>
+                  <polyline points='16 17 21 12 16 7'></polyline>
+                  <line x1='21' x2='9' y1='12' y2='12'></line>
+                </svg>
               )}
             </div>
           </div>
+          {isSmallScreen && (
+            <div
+              className={`absolute  ${
+                index >= 2 ? 'absolute -top-9 right-3' : '-top-10 -left-2.5'
+              }`}
+            >
+              <svg
+                onClick={async () => {
+                  await logout();
+                }}
+                xmlns='http://www.w3.org/2000/svg'
+                className={`h-12 w-12 mt-12 p-2 transform hover:bg-gray-100 rotate-180 text-gray-700 `}
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                // class='h-4 w-4 transform rotate-180'
+              >
+                <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'></path>
+                <polyline points='16 17 21 12 16 7'></polyline>
+                <line x1='21' x2='9' y1='12' y2='12'></line>
+              </svg>
+            </div>
+          )}
           {!isSmallScreen && (
-            <div className='lg:w-auto h-auto lg:h-[46rem] lg:-ml-1'>
+            <div className='flex lg:w-auto h-auto lg:h-[46rem] items-center lg:-ml-1'>
+              <div className='h-[103%] mt-9 bg-gray-300 ml-1 w-[1.5px]'></div>
               {index === 2 && !isSmallScreen && (
                 <div className='lg:w-[90%] w-screen h-full'>
-                  <div className='bg-orange-50 lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 border-2 border-orange-200 md:w-[89%] w-[79%] pr-4 rounded-md lg:px-2'>
-                    <div className='flex flex-col items-start lg:w-[22rem] h-full w-full relative mr-2'>
-                      <div className='ml-2 mt-7 text-3xl text-cyan-950'>Notifications</div>
+                  <div className='lg:h-[100%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 bg-white md:w-[93%] w-[79%] pr-4 rounded-md lg:px-2'>
+                    <div className='flex flex-col items-start lg:w-[22rem] h-full ml-1 w-full relative mr-2'>
+                      <div className='ml-2 mt-6 mb-3 text-3xl text-black'>Notifications</div>
+                      <div className='md:w-[94%] lg:w-[88%] h-[1.5px] ml-2 -mt-1.5 bg-gray-300'></div>
                       <Notifications username={username}></Notifications>
                     </div>
                   </div>
@@ -730,9 +889,10 @@ function Sidebar() {
               )}
               {index === 3 && !isSmallScreen && (
                 <div className='lg:w-[90%] w-screen h-full'>
-                  <div className='bg-orange-50 lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 border-2 border-orange-200 md:w-[89%] w-[79%] pr-4 rounded-md lg:px-2'>
-                    <div className='flex flex-col items-start lg:w-[22rem] h-full w-full relative mr-2'>
-                      <div className='ml-2 mt-7 text-3xl text-cyan-950'>Followers</div>
+                  <div className='lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 bg-white md:w-[93%] w-[79%] pr-4 rounded-md lg:px-2'>
+                    <div className='flex flex-col items-start lg:w-[22\rem] h-full ml-1 w-full relative mr-2'>
+                      <div className='ml-2.5 mt-6 mb-3 text-3xl text-black'>Followers</div>
+                      <div className='md:w-[94%] lg:w-[88%] h-[1.5px] ml-2 -mt-1.5 bg-gray-300'></div>
                       <Followers username={username}></Followers>
                     </div>
                   </div>
@@ -740,9 +900,10 @@ function Sidebar() {
               )}
               {index === 4 && !isSmallScreen && (
                 <div className='lg:w-[90%] w-screen h-full'>
-                  <div className='bg-orange-50 lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 border-2 border-orange-200 md:w-[89%] w-[79%] pr-4 rounded-md lg:px-2'>
-                    <div className='flex flex-col items-start lg:w-[22rem] h-full w-full relative mr-2'>
-                      <div className='ml-2 mt-7 text-3xl text-cyan-950'>Following</div>
+                  <div className='lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 bg-white md:w-[93%] w-[79%] pr-4 rounded-md lg:px-2'>
+                    <div className='flex flex-col items-start lg:w-[22rem] h-full ml-1 w-full relative mr-2'>
+                      <div className='ml-2.5 mt-6 mb-3 text-3xl text-black'>Following</div>
+                      <div className='md:w-[94%] lg:w-[88%] h-[1.5px] ml-2 -mt-1.5 bg-gray-300'></div>
                       <Following username={username}></Following>
                     </div>
                   </div>
@@ -750,18 +911,94 @@ function Sidebar() {
               )}
               {index === 5 && !isSmallScreen && (
                 <div className='lg:w-[90%] w-screen h-full'>
-                  <div className='bg-orange-50 lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 border-2 border-orange-200 md:w-[89%] w-[79%] pr-4 rounded-md lg:px-2'>
-                    <div className='flex flex-col items-start lg:w-[22rem] h-full w-full relative mr-2'>
-                      <div className='ml-2 mt-7 mb-1 text-3xl text-cyan-950'>Explore</div>
-                      <input
-                        type='text'
-                        className='rounded-md mb-2 border-2 border-sky-300 md:w-[102%] lg:w-[86%] w-[86%] ml-2 bg-white text-lg py-2 px-2 mr-4 placeholder-black outline-none '
-                        placeholder='Search..'
-                        value={input}
-                        onChange={(e) => handleChange(e.target.value)}
-                      />
+                  <div className='lg:h-[98%] md:h-[98.7%] lg:w-full h-[89%] lg:mt-1 md:mt-1 bg-white md:w-[93%] w-[79%] pr-4 rounded-md lg:px-2'>
+                    <div className='flex flex-col items-start lg:w-[22rem] h-full ml-1 w-full relative mr-2'>
+                      <div className='ml-2.5 mt-6 mb-3 text-3xl text-black'>Search</div>
+                      <div className='md:w-[94%] lg:w-[88%] h-[1.5px] ml-2 -mt-1.5 bg-gray-300'></div>
                       <div
-                        className={`lg:h-[85%] h-[85%] space-y-4 ml-2 w-[94%] lg:w-[96%] mt-4 rounded-md mr-2.5`}
+                        className={`lg:h-[85%] h-[85%]  ml-2 w-[94%] lg:w-[87.5%] mt-3 rounded-md mr-2.5`}
+                      >
+                        <div
+                          className='flex flex-col flex-col-wrap md:w-full lg:h-full md:h-full overflow-y-scroll space-y-6'
+                          style={{ height: 'auto', maxHeight: '100%' }}
+                        >
+                          <div className='flex w-full items-center space-x-1'>
+                            <input
+                              className='flex h-10 w-full focus:outline-none  rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
+                              placeholder='Search'
+                              type='search'
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <button className='inline-flex text-white bg-black items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-12'>
+                              <svg
+                                xmlns='http://www.w3.org/2000/svg'
+                                width='24'
+                                height='24'
+                                viewBox='0 0 24 24'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='2'
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                className='h-4 w-4'
+                              >
+                                <circle cx='11' cy='11' r='8' />
+                                <path d='m21 21-4.3-4.3' />
+                              </svg>
+                              <span className='sr-only'>Search</span>
+                            </button>
+                          </div>
+                          <div className='space-y-2.5'>
+                            {(searchQuery === '' ? list : filteredUsers).map((user) => (
+                              <div className='flex flex-col'>
+                                <div
+                                  key={user.user_name}
+                                  className='flex flex-row w-full bg-stone-100 rounded-md p-2 items-center justify-between'
+                                >
+                                  <div className='flex space-x-2'>
+                                    <img
+                                      src={`data:image/png;base64,${user.profile}`}
+                                      className='h-[3rem] w-[3rem] rounded-full'
+                                      alt={`${user.user_name}'s profile`}
+                                    />
+                                    <div className='text-lg py-3'>{user.user_name}</div>
+                                  </div>
+                                </div>
+                                <div className='w-full h-[2px] bg-gray-300'></div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className='w-full -mt-2 h-[2px] bg-gray-300'></div>
+                      </div>
+                      {/* <div className='flex w-full max-w-sm items-center space-x-1'>
+                        <input
+                          className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+                          placeholder='Search'
+                          type='search'
+                        />
+                        <button className='inline-flex text-white bg-black items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-12'>
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            width='24'
+                            height='24'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            className='h-4 w-4'
+                          >
+                            <circle cx='11' cy='11' r='8' />
+                            <path d='m21 21-4.3-4.3' />
+                          </svg>
+                          <span className='sr-only'>Search</span>
+                        </button>
+                      </div> */}
+                      {/* <div
+                        className={`lg:h-[85%] h-[85%] space-y-4 ml-2 w-[97.5%] lg:w- mt-4 rounded-md mr-2.5`}
                       >
                         <ul
                           className='flex flex-col flex-col-wrap w-full lg:h-full md:h-full overflow-y-scroll space-y-2 '
@@ -786,7 +1023,7 @@ function Sidebar() {
                           ))}
                         </ul>
                         <div className='w-[91%] h-[2px] bg-gray-300'></div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

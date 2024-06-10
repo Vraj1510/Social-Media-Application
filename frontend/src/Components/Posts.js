@@ -10,7 +10,8 @@ import { useEffect } from 'react';
 import EditPost from './EditPost';
 import { useRef } from 'react';
 import more from '../Images/more.png';
-import bin1 from '../Images/bin1.png';
+import bin2 from '../Images/bin2.png';
+import edit1 from '../Images/edit1.png';
 import MainComment from './MainComment';
 import Comments from './Comments';
 import { useIndex } from './IndexContext';
@@ -54,7 +55,7 @@ const Posts = ({ image, username1 }) => {
   const { username } = useIndex();
   const { edit, updateEdit } = useIndex();
   const [displayLikes, setDisplayLikes] = useState(-1);
-  const [confirm,setConfirm]=useState(-1);
+  const [confirm, setConfirm] = useState(-1);
   console.log(username1);
   console.log(username);
   useEffect(() => {
@@ -142,14 +143,33 @@ const Posts = ({ image, username1 }) => {
     }, [username]);
 
     return (
-      <img
+      <button
         onClick={likePostHandle}
-        src={liked ? like1 : like}
-        className='w-7 h-7 lg:w-8 lg:h-8 md:w-8 md:h-8'
-        alt='Like Icon'
-      />
+        class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          width='24'
+          height='24'
+          viewBox='0 0 24 24'
+          fill={liked ? 'black' : 'none'}
+          stroke='currentColor'
+          stroke-width='2'
+          stroke-linecap='round'
+          stroke-linejoin='round'
+          class='h-6 w-6'
+        >
+          <path d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'></path>
+        </svg>
+        <span class='sr-only'>Like</span>
+      </button>
     );
   };
+  const swipeHandlers = (post, idx) => ({
+    onSwipedLeft: () => handlePreviousImage(post, idx),
+    onSwipedRight: () => handleNextImage(post, idx),
+  });
+
   const fetchcomment = async (id) => {
     try {
       var myHeaders = new Headers();
@@ -218,11 +238,10 @@ const Posts = ({ image, username1 }) => {
     setEditPost(!editPost);
   };
   const handleNextImage = (post1, idx) => {
-    setCurrentImageIndex((prevIndex) => {
-      const newIndexes = [...prevIndex];
-      console.log(post1.length);
-      console.log(newIndexes[idx]);
-      if (newIndexes[idx] < post1.length - 1) {
+    console.log('handle next');
+    setCurrentImageIndex((prevIndexes) => {
+      const newIndexes = [...prevIndexes];
+      if (newIndexes[idx] < post1.pictures.length - 1) {
         newIndexes[idx] += 1;
       }
       return newIndexes;
@@ -230,8 +249,9 @@ const Posts = ({ image, username1 }) => {
   };
 
   const handlePreviousImage = (post1, idx) => {
-    setCurrentImageIndex((prevIndex) => {
-      const newIndexes = [...prevIndex];
+    console.log('handle previous');
+    setCurrentImageIndex((prevIndexes) => {
+      const newIndexes = [...prevIndexes];
       if (newIndexes[idx] > 0) {
         newIndexes[idx] -= 1;
       }
@@ -339,44 +359,34 @@ const Posts = ({ image, username1 }) => {
   }, []);
 
   return (
-    <div className='flex flex-col w-[90%] md:mr-0 lg:-mt-0 md:-mt-0 lg:mr-0 md:w-[90%] lg:w-[75%] md: lg:-ml-0'>
+    <div className='flex flex-col items-center justify-around w-[100%] md:mr-0 lg:-mt-0 md:-mt-0 lg:mr-0 md:w-[99%] lg:w-[115%] lg:-ml-14'>
       {posts &&
         posts.map((post, idx) => {
           return (
             <div
               key={idx}
-              className='flex flex-col items-center border-2 border-orange-200 bg-orange-50 my-4 w-full rounded-lg'
+              className='w-[90%] md:h-[98%] lg:min-w-[540px] overflow-x-hidden lg:w-[75%] border bg-stone-100 p-1 flex flex-col items-center mb-4 rounded-lg flex-1 overflow-y-scroll'
             >
-              <div className='flex flex-row w-11/12 my-2 items-center justify-between space-x-4'>
+              <div className='flex justify-between w-[93%] m-2 -ml-2  space-x-4'>
                 <div className='flex flex-row items-center space-x-4'>
                   <img
                     src={`data:image/png;base64,${image}`}
-                    className='rounded-full h-10 lg:h-16 md:h-16 w-10 lg:w-16 md:w-16'
+                    className='rounded-full h-10 lg:h-12 md:h-16 w-10 lg:w-12 md:w-16'
                   ></img>
-                  <div className='text-2xl lg:text-3xl md:text-3xl text-cyan-950'>{username1}</div>
+                  <div className='text-2xl lg:text-2xl font-medium md:text-3xl text-black'>
+                    {username1}
+                  </div>
                 </div>
                 {username === username1 && (
-                  <div className='flex flex-row space-x-4 text-white'>
-                    {isSmallScreen ? (
-                      <img
-                        onClick={() => {
-                          DeletePost(post.id);
-                        }}
-                        src={bin1}
-                        className='cursor-pointer h-6 w-6 mt-1 rounded-md'
-                      />
-                    ) : (
-                      <button
-                        onClick={() => {
-                          // DeletePost(post.id);
-                          setConfirm(post.id);
-                        }}
-                        className='bg-sky-700 cursor-pointer border-2 border-orange-200 shadow-xl rounded-md py-2 w-20'
-                      >
-                        Delete
-                      </button>
-                    )}
-                    {confirm===post.id && (
+                  <div className='flex flex-row space-x-4 items-center -mt-1 text-white'>
+                    <img
+                      onClick={() => {
+                        DeletePost(post.id);
+                      }}
+                      src={bin2}
+                      className='cursor-pointer h-8 w-8 mt-1 rounded-md'
+                    />
+                    {confirm === post.id && (
                       <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
                         <div className='flex flex-col absolute w-1/4 border-2 rounded-md items-center justify-center space-y-8 border-cyan-600 h-1/3 text-center text-cyan-950 bg-cyan-50'>
                           <div className='text-4xl'>Delete Post</div>
@@ -414,26 +424,13 @@ const Posts = ({ image, username1 }) => {
                       </div>
                     )}
                     <div>
-                      {isSmallScreen ? (
-                        <img
-                          onClick={async () => {
-                            await handledit();
-                          }}
-                          src={edit}
-                          className='h-6 w-6 mt-1 cursor-pointer rounded-md '
-                        />
-                      ) : (
-                        <button
-                          onClick={async () => {
-                            await handledit();
-                            updateEdit(idx);
-                          }}
-                          className='bg-sky-700 border-2 border-orange-200 shadow-xl cursor-pointer rounded-md py-2 w-20'
-                        >
-                          Edit
-                        </button>
-                      )}
-
+                      <img
+                        onClick={async () => {
+                          await handledit();
+                        }}
+                        src={edit1}
+                        className='h-6 w-6 mt-1 cursor-pointer rounded-md '
+                      />
                       {edit === idx && (
                         <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
                           <div className='fixed flex flex-col bg-cyan-700 border-2 border-cyan-950 p-3 w-[71rem] h-[42rem] rounded-lg z-50'>
@@ -455,53 +452,121 @@ const Posts = ({ image, username1 }) => {
                   </div>
                 )}
               </div>
-              <div className='h-[2px] w-11/12 md:mb-4 lg:mb-4 bg-stone-300'></div>
-              <div className='flex flex-col w-full -mt-10'>
+              <div className='flex w-[95%] -mt-3.5 mb-2 items-center justify-center'>
+                <div className='h-[2px] my-3 w-[110%] bg-gray-300'></div>
+              </div>
+              <div className='flex flex-col w-[102%] -mt-14'>
                 {post.pictures && post.pictures.length > 0 && (
                   <div className='flex flex-row items-center justify-around w-full relative'>
-                    <img
-                      src={leftarrow}
-                      className='w-[2rem] h-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] md:h-[2.5rem] md:w-[2.5rem] lg:h-[3rem] lg:w-[3rem] cursor-pointer z-10 -mr-14 mt-4 rounded-full p-2'
-                      onClick={() => handlePreviousImage(post.pictures, idx)}
-                    />
                     {post.pictures[currentImageIndex[idx]] && (
                       <img
                         key={currentImageIndex[idx]}
                         src={`data:image/png;base64,${post.pictures[currentImageIndex[idx]]}`}
                         alt={`post Image ${currentImageIndex[idx]}`}
                         className='mt-12 h-[14rem] sm:h-[28rem] md:h-[28rem] lg:h-[28rem] w-[95%] lg:w-11/12 md:w-11/12 rounded-md object-cover'
+                        {...swipeHandlers(post, idx)}
                       />
                     )}
-                    <img
-                      src={rightarrow}
-                      className='w-[2rem] h-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] md:h-[2.5rem] md:w-[2.5rem] lg:h-[3rem] lg:w-[3rem] cursor-pointer -ml-14 mt-4 rounded-full p-2'
-                      onClick={() => handleNextImage(post.pictures, idx)}
-                    />
                   </div>
                 )}
 
-                <div className='flex flex-col w-full mx-4 mt-1 lg:mt-2 md:mt-2'>
-                  <div className='flex flex-row w-full mt-1'>
-                    <Like id={post.id} username={username}></Like>
-                    <img
-                      onClick={async () => {
-                        setComment(post.id);
-                        await fetchcomment(post.id);
-                      }}
-                      src={comment}
-                      className='h-7 w-7 md:h-8 lg:h-8 md:w-8 lg:w-8 ml-4 cursor-pointer'
-                    ></img>
-                    <SharePost id={post.id}></SharePost>
+                <div className='flex flex-col w-full ml-5 mt-1 lg:mt-2 md:mt-2'>
+                  <div className='flex relative -mt-1'>
+                    <div className='flex flex-row '>
+                      <Like id={post.id} username={username}></Like>
+                      <button
+                        onClick={async () => {
+                          setComment(post.id);
+                          await fetchcomment(post.id);
+                        }}
+                        class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          stroke-width='2'
+                          stroke-linecap='round'
+                          stroke-linejoin='round'
+                          class='h-6 w-6'
+                        >
+                          <path d='m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z'></path>
+                        </svg>
+                        <span class='sr-only'>Comment</span>
+                      </button>
+                      <SharePost id={post.id}></SharePost>
+                    </div>
+                    <div className='flex absolute top-3 -left-1 w-full justify-center gap-4 -mt-1'>
+                      <div
+                        className='flex cursor-pointer h-5 w-5'
+                        onClick={() => {
+                          handlePreviousImage(post, idx);
+                        }}
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          stroke-width='2'
+                          stroke-linecap='round'
+                          stroke-linejoin='round'
+                          class='h-5 w-5 cursor-pointer'
+                        >
+                          <path d='m12 19-7-7 7-7'></path>
+                          <path d='M19 12H5'></path>
+                        </svg>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        {post.pictures.map((_, index) => (
+                          <div
+                            key={index}
+                            className={`h-2 w-2 rounded-full ${
+                              index === currentImageIndex[idx]
+                                ? 'bg-gray-700'
+                                : 'bg-gray-400 dark:bg-gray-600'
+                            }`}
+                          ></div>
+                        ))}
+                      </div>
+                      <div
+                        className='cursor-pointer'
+                        onClick={() => {
+                          handleNextImage(post, idx);
+                        }}
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          stroke-width='2'
+                          stroke-linecap='round'
+                          stroke-linejoin='round'
+                          class='h-5 w-5 cursor-pointer'
+                        >
+                          <path d='M5 12h14'></path>
+                          <path d='m12 5 7 7-7 7'></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   {console.log(map)}
                   {displayLikes === idx && (
                     <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
-                      <div className='flex flex-col w-1/3 h-5/6 rounded-md bg-orange-100 border-2 border-orange-300'>
+                      <div className='flex flex-col w-1/4 px-4 h-5/6 rounded-md bg-white'>
                         <div className='flex w-full justify-between'>
-                          <div className='text-3xl font-normal m-4 text-sky-950'>Likes</div>
+                          <div className='text-3xl font-normal my-4 ml-1 text-black'>Likes</div>
                           <img
                             src={remove}
-                            className='h-5 w-5 -m-3'
+                            className='h-5 w-5 -mt-2 -mr-6'
                             onClick={() => {
                               setDisplayLikes(-1);
                             }}
@@ -512,56 +577,54 @@ const Posts = ({ image, username1 }) => {
                     </div>
                   )}
 
-                  <div
-                    className='ml-1 text-md cursor-pointer'
-                    onClick={() => {
-                      setDisplayLikes(idx);
-                    }}
-                  >
-                    {' '}
-                    <div className='text-lg text-md'>
-                      {posts && map && map.has(post.id) ? map.get(post.id).length : 0} likes
+                  <div className='ml-3 -mt-0.5 -space-y-0.5'>
+                    <div
+                      className='text-md cursor-pointer'
+                      onClick={() => {
+                        setDisplayLikes(idx);
+                      }}
+                    >
+                      {' '}
+                      <div className='text-md'>
+                        {posts && map && map.has(post.id) ? map.get(post.id).length : 0} likes
+                      </div>
+                    </div>
+                    <div
+                      onClick={async () => {
+                        setComment(post.id);
+                        await fetchcomment(post.id);
+                      }}
+                      className='text-md cursor-pointer md:-mt-1.5 '
+                    >
+                      {console.log(map1)}
+                      View {map1.get(post.id)} comments
+                    </div>
+                    <div className='flex flex-row md:-mt-1.5 space-x-1 '>
+                      <div className='text-md font-semibold'>{username1}</div>
+                      <div className='text-md'>{post.caption}</div>
                     </div>
                   </div>
-
-                  <div
-                    onClick={async () => {
-                      setComment(post.id);
-                      await fetchcomment(post.id);
-                    }}
-                    className='text-md cursor-pointer -mt-1 ml-1'
-                  >
-                    {console.log(map1)}
-                    View {map1.get(post.id)} comments
-                  </div>
-                  <div className='flex flex-row ml-1 -mt-1 space-x-1 mb-1'>
-                    <div className='text-xl font-semibold'>{username1}</div>
-                    <div className='text-xl'>{post.caption}</div>
-                  </div>
                 </div>
-                <div className='mx-3 mt-2 mb-1.5'>
+                <div className='lg:ml-4 md:ml-4 ml-2 mt-2 w-[96%] mb-2'>
                   <MainComment id={post.id} username={username}></MainComment>
                 </div>
                 {comment1 === post.id && (
                   <div className='fixed inset-0 flex items-center justify-center z-50 backdrop-filter w-full h-full backdrop-blur-sm bg-black bg-opacity-50'>
-                    <div className='bg-white w-2/3 h-5/6 p-4 rounded-lg flex flex-col justify-between'>
+                    <div className='absolute bg-white w-2/3 h-5/6 p-4 rounded-lg flex justify-between'>
                       <Comments
                         id={post.id}
                         comments1={[...comments]}
                         username={username}
                       ></Comments>
-                      <div className='flex flex-row space-x-2 items-center'>
+                      <div className='absolute top-3 right-4 flex flex-row space-x-2 items-center'>
                         <button
-                          className='bg-sky-300 py-1.5 -mb-1 px-2 border-2 rounded-md shadow-md border-gray-300'
+                          className='bg-black text-white py-1.5 -mb-1 px-4 rounded-md shadow-md'
                           onClick={() => {
                             setComment(-1);
                           }}
                         >
                           Close
                         </button>
-                        <div className='-mb-2  w-full'>
-                          <MainComment id={post.id} username={username}></MainComment>
-                        </div>
                       </div>
                     </div>
                   </div>

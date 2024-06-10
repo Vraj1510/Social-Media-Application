@@ -5,9 +5,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useIndex } from './IndexContext';
 import Posts from './Posts';
-import AddPost from './Addpost';
 import Sidebar from './Sidebar';
 import PYMK from './PYMK';
+import AddPost from './Addpost';
 let imageUrl;
 export const followersOfUser = async (username) => {
   try {
@@ -132,6 +132,9 @@ function Profile() {
       console.error('Error fetching image:', err.message);
     }
   };
+  const editprofile1 = () => {
+    navigate('/app/editprofile');
+  };
   const fetchnote1 = async () => {
     const username1 = username;
     const body = { username1 };
@@ -214,229 +217,206 @@ function Profile() {
   }, [username]);
 
   return (
-    // <div className='flex'>
-    //   <div className='flex flex-col w-28 ml-1 items-center pt-2'>
-    //     <div className='flex flex-col ml-12 items-center'>
-    //       <div className='pt-4'>
-    //         {imageUrl ? (
-    //           <img
-    //             src={imageUrl}
-    //             onClick={() => inputRef.current.click()}
-    //             className='h-[6rem] w-[6rem] cursor-pointer overflow-hidden rounded-full'
-    //             alt='Profile'
-    //           />
-    //         ) : (
-    //           <img
-    //             src={img1}
-    //             className='h-[6rem] w-[7rem] cursor-pointer overflow-hidden rounded-full'
-    //             onClick={() => inputRef.current.click()}
-    //             alt='Default Profile'
-    //           />
-    //         )}
-    //         <input
-    //           type='file'
-    //           className='h-[5rem] w-[5rem] cursor-pointer rounded-lg'
-    //           ref={inputRef}
-    //           style={{ display: 'none' }}
-    //           onChange={handleImageChange}
-    //         />
-    //       </div>
-    //       <text className='text-3xl align-top items font-semibold text-cyan-950'>{username}</text>
-    //     </div>
-    //     <div className='w-[4rem] ml-1 mt-[5rem] rounded-xl bg-cyan-950'>
-    //       <AddPost username={username}></AddPost>
-    //       <Form onSubmit={handleFormSubmit}></Form>
-    //       <img
-    //         src={logoImg}
-    //         className='rounded-full h-[5rem] pl-1.5 pr-1.5 w-20 mt-20 pb-5'
-    //         alt='Image Description'
-    //       />
-    //     </div>
-    //   </div>
-    //   <div>
-    //     <div className='flex flex-row'>
-    //       <div className='flex flex-row bg-cyan-950 h-[3.8rem] rounded-xl justify-between mt-7 ml-[5.8rem] pl-3'>
-    //         <img
-    //           onClick={openPopupn}
-    //           className='w-[3.6rem] h-[3.4rem] mr-3 pl-1 pr-1 hover:bg-cyan-600'
-    //           src={notif}
-    //         ></img>
-    //         {isPopupOpenn && (
-    //           <div className='absolute top-[6rem] left-[13.7rem] w-[28rem] z-10 bg-cyan-950 shadow-md rounded-lg p-4'>
-    //             <div className='text-xl text-stone-50 font-semibold mb-2'>Notifications</div>
-    //             <Notifications className='z-2' username={username}></Notifications>
-    //             <button
-    //               onClick={closePopupn}
-    //               className='bg-stone-50 hover:text-white text-cyan-950 hover:bg-cyan-600 px-2 py-1 mt-3 rounded-lg'
-    //             >
-    //               Close
-    //             </button>
+    // <div className='md:h-screen lg:h-auto w-screen h-screen'>
+    //   <div
+    //     className={`flex  ${
+    //       isSmallScreen ? 'flex-col flex-col-wrap overflow-y-scroll -mt-1' : ' flex-row'
+    //     } w-full h-full justify-between  lg:justify-between`}
+    //   >
+    //     {!isSmallScreen && <Sidebar index={1} username={username}></Sidebar>}
+    //     {(index < 2 || isLargeScreen) && (
+    //       <div
+    //         className={`
+    //     flex flex-col w-full items-center lg:-ml-0 lg:h-[46rem] md:h-[97%] md:w-full overflow-y-scroll lg:w-[60%]`}
+    //       >
+    //         <div className='flex space-x-6 justify-center items-center p-6'>
+    //           <div className='flex items-center justify-center'>
+    //             <img
+    //               src={`data:image/png;base64,${imageUrl}`} // Set the src attribute with Base64-encoded image content
+    //               alt='Profile'
+    //               className='h-[8rem] w-[8rem] cursor-pointer rounded-full'
+    //               // onClick={() => inputRef.current.click()}
+    //             />
     //           </div>
-    //         )}
-    //         <img
-    //           src={followers}
-    //           onClick={openPopup}
-    //           className='w-13 h-[3.8rem] ml-32 pl-1 pr-1 pt-2 pb-1 hover:bg-cyan-600'
-    //         ></img>
-    //         {isPopupOpen && (
-    //           <div className='absolute top-[6rem] left-[26rem] w-[15rem] bg-cyan-950 shadow-md rounded-lg p-4'>
-    //             <div className='text-xl text-stone-50 font-semibold mb-2'>Followers</div>
-    //             <Following username={username}></Following>
-    //             <button
-    //               onClick={closePopup}
-    //               className='bg-stone-50 text-cyan-950 hover:text-white hover:bg-cyan-600 px-2 py-1 mt-3 rounded-lg'
-    //             >
-    //               Close
-    //             </button>
+    //           <div className='flex flex-col space-y-0.5 justify-center'>
+    //             <div className='text-[3rem] font-light leading-none'>{username}</div>
+    //             {inputValue && inputValue !== '' && (
+    //               <div className='ml-2 text-lg'>{inputValue}</div>
+    //             )}
+    //             <div className='flex items-center gap-4 text-center w-full -ml-1.5 sm:w-auto sm:mt-0'>
+    //               <div className='space-y-1'>
+    //                 <div className='text-2xl font-bold'>{followers}</div>
+    //                 <div className='text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+    //                   followers
+    //                 </div>
+    //               </div>
+    //               <div className='border-l border-r h-8'></div>
+    //               <div className='space-y-1'>
+    //                 <div className='text-2xl font-bold'>{following}</div>
+    //                 <div className='text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+    //                   following
+    //                 </div>
+    //               </div>
+    //               <div className='border-l border-r h-8'></div>
+    //               <div className='space-y-1'>
+    //                 <div className='text-2xl font-bold'>{posts}</div>
+    //                 <div className='text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+    //                   posts
+    //                 </div>
+    //               </div>
+    //             </div>
     //           </div>
-    //         )}
-    //         <img
-    //           src={following}
-    //           onClick={openPopupf}
-    //           className='w-[4rem] h-[4rem] ml-32 pl-1 pr-1 pb-1 pt-1 mr-2 hover:bg-cyan-600'
-    //         ></img>
-    //         {isPopupOpenf && (
-    //           <div className='absolute top-[6rem] left-[38.5rem] z-10 w-[15rem] w-40 bg-cyan-950 shadow-md rounded-lg p-4'>
-    //             <div className='text-xl text-stone-50 font-semibold mb-2'>Following</div>
-    //             <Followers username={username}></Followers>
-    //             <button
-    //               onClick={closePopupf}
-    //               className='hover:text-white hover:bg-cyan-600 bg-stone-50 text-cyan-950 px-2 py-1 mt-3 rounded-lg'
+    //         </div>
+    //         <div className='flex flex-col items-center w-3/4 px-6'>
+    //           <div className='flex w-3/4 gap-2'>
+    //             <div
+    //               onClick={() => {
+    //                 editprofile1();
+    //               }}
+    //               className='flex cursor-pointer items-center w-[300px] rounded-2xl px-3 py-1 text-white bg-black text-lg'
     //             >
-    //               Close
-    //             </button>
+    //               <button className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 w-10 h-10'>
+    //                 <svg
+    //                   xmlns='http://www.w3.org/2000/svg'
+    //                   width='24'
+    //                   height='24'
+    //                   viewBox='0 0 24 24'
+    //                   fill='none'
+    //                   stroke='currentColor'
+    //                   strokeWidth='2'
+    //                   strokeLinecap='round'
+    //                   strokeLinejoin='round'
+    //                   className='w-5 h-5'
+    //                 >
+    //                   <path d='M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5'></path>
+    //                   <polyline points='14 2 14 8 20 8'></polyline>
+    //                   <path d='M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z'></path>
+    //                 </svg>
+    //               </button>
+    //               <div>Edit Profile</div>
+    //             </div>
+    //             <div className='flex cursor-pointer items-center w-[300px] rounded-2xl px-3 py-1 border text-black text-lg bg-gray-100'>
+    //               <AddPost username={username}></AddPost>
+    //             </div>
     //           </div>
-    //         )}
-    //       </div>
-    //       <textarea
-    //         disabled={inputvalue}
-    //         ref={inputref}
-    //         placeholder={inputValue}
-    //         className='h-[4rem] rounded-lg ml-[6rem] mt-[1.5rem] p-1 w-[700px] placeholder-white placeholder-semibold text-semibold text-lg caret-white text-white bg-cyan-950 disabled'
-    //         value={inputValue}
-    //         onChange={handleInputChange}
-    //       />
-    //       <img
-    //         src={edit}
-    //         onClick={inputfunctionedit}
-    //         className='w-11 h-10 mt-9 pr-1 pt-1 pb-1 ml-2 pl-1 bg-cyan-950 hover:bg-cyan-600'
-    //       ></img>
-    //       <img
-    //         src={save}
-    //         onClick={inputfunctiondisable}
-    //         className='w-11 h-10 mt-9 pr-1 pt-1 pb-1 ml-2 pl-1 bg-cyan-950 hover:bg-cyan-600'
-    //       ></img>
-    //       {/* </div> */}
-    //     </div>
-    //     <div className='flex flex-row pt-1'>
-    //       <div className='flex flex-col overflow-y-scroll mt-16 ml-[3.8rem]'>
-    //         <div className='post-container h-[40rem] overflow-y-scroll flex-1'>
-    //           <DataHandler username={username} image={imageUrl} />
+    //         </div>
+    //         <div className='h-[2px] w-5/6 my-3 bg-gray-300'></div>
+    //         <div className={`w-[100%] ${
+    //       isLargeScreen && index >= 2 ? 'z-auto ' : ''
+    //     }`}>
+    //         <Posts username1={username} image={imageUrl}></Posts>
     //         </div>
     //       </div>
-    //       <div className='bg-cyan-950 rounded-lg mt-16 w-[16rem] ml-[3rem] h-[40rem]'>
-    //         {/* <PeopleYMK></PeopleYMK> */}
+    //     )}
+
+    //     {isSmallScreen && (
+    //       <div className='w-screen h-auto mt-2'>
+    //         {' '}
+    //         <Sidebar index={1} username={username}></Sidebar>
     //       </div>
-    //     </div>
+    //     )}
+
+    //     {isLargeScreen && <PYMK username={username}></PYMK>}
     //   </div>
     // </div>
-    <div className='md:h-screen lg:h-auto w-screen h-screen'>
-      <div
-        className={`flex  ${
-          isSmallScreen ? 'flex-col flex-col-wrap overflow-y-scroll -mt-1' : 'flex-row'
-        } w-full h-full justify-between lg:justify-between`}
-      >
-        {!isSmallScreen && <Sidebar index={1} username={username}></Sidebar>}
-        {(index < 2 || isLargeScreen) && (
-          <div className='flex flex-col w-full items-center lg:-ml-0 lg:h-[46rem] md:h-[97%] md:w-full overflow-y-scroll lg:w-[60%]'>
-            <div className='flex flex-row items-center space-x-6 lg:-ml-8 md:-ml-4'>
-              {!isSmallScreen && imageUrl && (
-                <img
-                  src={`data:image/png;base64,${imageUrl}`} // Set the src attribute with Base64-encoded image content
-                  alt='Profile'
-                  className='h-[9rem] w-[9rem] mt-6 cursor-pointer overflow-hidden rounded-full'
-                  // onClick={() => inputRef.current.click()}
-                />
-              )}
-              <div className='flex flex-col items-top'>
-                <div
-                  className={`flex flex-col lg:flex-row md:flex-row items-top md:space-x-6 space-x-2 lg:space-x-6`}
-                >
-                  <div
-                    className={`flex items-center md:ml-0 lg:ml-0  ${
-                      isSmallScreen ? 'space-x-4' : 'space-x-0'
-                    }`}
-                  >
-                    {isSmallScreen && imageUrl && (
-                      <img
-                        src={`data:image/png;base64,${imageUrl}`}
-                        className='h-[5rem] w-[5rem] my-4 mr-4 cursor-pointer overflow-hidden rounded-full'
-                        alt='Profile'
-                      />
-                    )}
-                    <div className='flex flex-col'>
-                      <div className='text-4xl font-light md:mt-5 lg:mt-7'>{username}</div>
-                      {isSmallScreen && (
-                        <div
-                          className={`flex lg:flex-row md:flex-row md:-mt-0 lg:-mt-0 mt-2 -ml-2 items-center md:space-x-6 space-x-2 lg:space-x-6`}
-                        >
-                          <button className='text-cyan-950 w-24 h-10 border-2 border-sky-300 bg-orange-100 text-lg rounded-lg md:mt-6 lg:mt-6'>
-                            Edit Profile
-                          </button>
-                          <AddPost username={username}></AddPost>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {!isSmallScreen && (
-                    <div
-                      className={`flex lg:flex-row md:flex-row md:-mt-0 lg:-mt-0 -mt-2 items-center md:space-x-6 space-x-3 lg:space-x-6`}
-                    >
-                      <button
-                        onClick={() => {
-                          navigate('/app/editprofile', { state: { username } });
-                        }}
-                        className='text-cyan-950 border-2 border-sky-300 w-[120px] h-[50px] bg-orange-100 text-xl rounded-lg md:mt-4 lg:mt-4'
-                      >
-                        Edit Profile
-                      </button>
-                      <AddPost username={username}></AddPost>
-                    </div>
-                  )}
-                </div>
-                <div className='flex flex-row md:space-x-16 space-x-12 md:-ml-0 lg:-ml-0 ml-1 lg:space-x-16 -mt-1.5 md:mt-0.5 lg:mt-2'>
-                  <div className='flex flex-col items-center'>
-                    <div className='text-3xl lg:text-3xl md:text-3xl font-medium'>{posts}</div>
-                    <div className='text-lg -mt-2 md:-mt-1.5 lg:-mt-1.5 font-light'>Posts</div>
-                  </div>
-                  <div className='flex flex-col items-center'>
-                    <div className='text-3xl lg:text-3xl md:text-3xl font-medium'>{followers}</div>
-                    <div className='text-lg -mt-2 md:-mt-1.5 lg:-mt-1.5 font-light'>Following</div>
-                  </div>
-                  <div className='flex flex-col items-center'>
-                    <div className='text-3xl lg:text-3xl md:text-3xl font-medium'>{following}</div>
-                    <div className='text-lg -mt-2 md:-mt-1.5 lg:-mt-1.5 font-light'>Followers</div>
+    <div
+      className={`flex  ${
+        isSmallScreen ? 'flex-col ' : 'flex-row'
+      } w-screen h-screen fixed bg-white lg:justify-between `}
+    >
+      {!isSmallScreen && <Sidebar username={username} index={0}></Sidebar>}
+      {/* {index < 2 ? (
+        <DashBoardPosts username={username}></DashBoardPosts>
+      ) : (
+        isLargeScreen && <DashBoardPosts username={username}></DashBoardPosts>
+      )} */}
+      {(index < 2 || isLargeScreen) && (
+        <div
+          className={`
+        flex flex-col w-full items-center lg:-ml-0 lg:h-[48rem] md:h-[97%] md:w-full overflow-y-scroll overflow-x-hidden lg:w-[60%]`}
+        >
+          <div className='flex space-x-6 justify-center items-center p-6'>
+            <div className='flex items-center justify-center'>
+              <img
+                src={`data:image/png;base64,${imageUrl}`} // Set the src attribute with Base64-encoded image content
+                alt='Profile'
+                className='h-[8rem] w-[8rem] cursor-pointer rounded-full'
+                // onClick={() => inputRef.current.click()}
+              />
+            </div>
+
+            <div className='flex flex-col space-y-2 justify-center'>
+              <div className='text-[2.5rem] font-light leading-none'>{username}</div>
+              {inputValue && inputValue !== '' && <div className='ml-2 text-lg'>{inputValue}</div>}
+              <div className='flex items-center gap-4 text-center w-full -ml-1.5 sm:w-auto sm:mt-0'>
+                <div className='space-y-1'>
+                  <div className='text-2xl font-bold'>{followers}</div>
+                  <div className='text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                    followers
                   </div>
                 </div>
-                <div className='-mr-1 mt-1 -ml-1 shadow-lg px-1 rounded-md text-lg text-cyan-900 bg-cyan-50 border-cyan-300 border-2'>
-                  {inputValue}
+                <div className='border-l border-r h-8'></div>
+                <div className='space-y-1'>
+                  <div className='text-2xl font-bold'>{following}</div>
+                  <div className='text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                    following
+                  </div>
+                </div>
+                <div className='border-l border-r h-8'></div>
+                <div className='space-y-1'>
+                  <div className='text-2xl font-bold'>{posts}</div>
+                  <div className='text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+                    posts
+                  </div>
                 </div>
               </div>
             </div>
-            <div className='w-[80%] h-[40px] pt-[2px] mt-5 -mb-1.5 bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col items-center w-3/4 px-6'>
+            <div className='flex lg:w-3/4 w-full gap-2'>
+              <div
+                onClick={() => {
+                  editprofile1();
+                }}
+                className='flex cursor-pointer items-center w-[300px] rounded-2xl px-3 py-1 text-white bg-black text-lg'
+              >
+                <button className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 w-10 h-10'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    className='w-5 h-5'
+                  >
+                    <path d='M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5'></path>
+                    <polyline points='14 2 14 8 20 8'></polyline>
+                    <path d='M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z'></path>
+                  </svg>
+                </button>
+                <div>Edit Profile</div>
+              </div>
+              <div className='flex cursor-pointer items-center w-[300px] rounded-2xl px-3 py-1 border text-black text-lg bg-gray-100'>
+                <AddPost username={username}></AddPost>
+              </div>
+            </div>
+          </div>
+          <div className='h-[2px] w-5/6 my-3 bg-gray-300'></div>
+          <div
+            className={`w-[100%] ${
+              isLargeScreen && index >= 2 ? 'flex z-auto items-center justify-around ' : ''
+            }`}
+          >
             <Posts username1={username} image={imageUrl}></Posts>
           </div>
-        )}
-
-        {isSmallScreen && (
-          <div className='w-screen h-auto mt-2'>
-            {' '}
-            <Sidebar index={1} username={username}></Sidebar>
-          </div>
-        )}
-
-        {isLargeScreen && <PYMK username={username}></PYMK>}
-      </div>
+        </div>
+      )}
+      {isLargeScreen && username && <PYMK username={username}></PYMK>}
+      {isSmallScreen && <Sidebar username={username} index={0}></Sidebar>}
     </div>
   );
 }

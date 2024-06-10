@@ -11,6 +11,7 @@ const EditProfile = () => {
   const { state } = useLocation();
   const [file, setFile] = useState(null);
   const { username } = useIndex();
+  const { updateUsername } = useIndex();
   const navigate = useNavigate();
   const [newUsername, setNewUsername] = useState(username);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
@@ -109,6 +110,34 @@ const EditProfile = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [index, isSmallScreen]);
 
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/checksession', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // This line enables sending cookies
+        });
+        console.log(response);
+        const result = await response.json();
+        console.log(result);
+        if (result.valid === false) {
+          navigate('/auth');
+        } else {
+          console.log(result.username);
+          //  setUsername1(result.username);
+          updateUsername(result.username);
+        }
+      } catch (err) {
+        console.error('Error during session check:', err.message);
+      }
+    };
+
+    checkSession();
+  }, []);
+
   return (
     <div className='md:h-auto lg:h-auto w-screen h-screen'>
       <div
@@ -123,33 +152,56 @@ const EditProfile = () => {
             <Sidebar index={1} username={username}></Sidebar>
           </div>
         )}
-        <div className='flex flex-col h-[95%] justify-around items-center w-[50%] mt-2.5 rounded-md bg-orange-50 border-2 border-orange-200'>
+        <div className='flex flex-col h-[95%] justify-around items-center w-[50%] mt-2.5 rounded-md bg-white border shadow-md'>
           <div className='flex flex-row items-center space-x-20'>
-            <img
-              style={{ width: '350px', height: '350px' }}
-              src={changed ? imageUrl : `data:image/png;base64,${imageUrl}`}
-              alt='Image'
-            />
-
-            <button
+            {/* <button
               onClick={() => fileInput.current.click()}
               className='text-cyan-950 border-2 border-sky-400 w-24 lg:w-44 md:w-28 md:h-12 lg:h-16 h-10 bg-cyan-100 text-lg md:text-xl lg:text-xl rounded-lg md:mt-6 lg:mt-6'
             >
               Choose Image
+            </button> */}
+            <button
+              onClick={() => fileInput.current.click()}
+              class='inline-flex bg-gray-100 shadow-md items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 border-input bg-background hover:bg-accent hover:text-accent-foreground h-16 w-16'
+            >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                class='h-8 w-8'
+              >
+                <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path>
+                <polyline points='17 8 12 3 7 8'></polyline>
+                <line x1='12' x2='12' y1='3' y2='15'></line>
+              </svg>
+              <span class='sr-only'>Upload image</span>
             </button>
             <input
               type='file'
               ref={fileInput}
+              className='focus:ouline-none'
               style={{ display: 'none' }}
               multiple
               onChange={handleFileChange}
+            />
+            <img
+              style={{ width: '350px', height: '350px' }}
+              src={changed ? imageUrl : `data:image/png;base64,${imageUrl}`}
+              alt='Image'
+              className='rounded-md'
             />
           </div>
           <div className='flex flex-col w-full space-y-4 items-center'>
             <input
               placeholder='Username'
               disabled
-              className='w-11/12 border-2 text-lg px-1.5 h-10 outline-none border-orange-200 shadow-md rounded-md disabled'
+              className='w-11/12 border bg-stone-200 text-md px-2 h-10 focus:outline-none shadow-sm rounded-sm disabled'
               value={newUsername}
               onChange={(e) => {
                 setNewUsername(e.target.value);
@@ -157,7 +209,7 @@ const EditProfile = () => {
             ></input>
             <input
               placeholder='Caption...'
-              className='w-11/12 border-2 text-lg px-1.5 h-10 outline-none border-orange-200 shadow-md rounded-md'
+              className='w-11/12 border bg-stone-50 text-md px-2 h-10 focus:outline-none shadow-sm rounded-sm'
               value={inputValue}
               onChange={(e) => {
                 setInputValue(e.target.value);
@@ -165,37 +217,88 @@ const EditProfile = () => {
             ></input>
             <input
               placeholder='Email...'
-              className='w-11/12 border-2 text-lg px-1.5 h-10 outline-none border-orange-200 shadow-md rounded-md'
+              className='w-11/12 focus:outline-none border bg-stone-50 text-md px-2 h-10 outline-none shadow-sm rounded-sm'
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
             ></input>
-            <div className='flex w-11/12 border-2 text-lg pl-1.5 h-10 outline-none border-orange-200 shadow-md rounded-md'>
-            
+            <div className='flex w-11/12 border bg-stone-50 text-md pl-2 h-10 outline-none shadow-sm rounded-sm'>
               <input
-                className='w-full h-full outline-none !important cursor-pointer'
+                className='w-full h-full focus:outline-none bg-stone-50 !important cursor-pointer'
                 type={showPassword ? 'text' : 'password'}
                 placeholder='Password....'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <img
+              {/* <img
                 onClick={handleImageClick}
                 src={showPassword ? visible : hidden}
-                className='bg-cyan-950 p-2 h-10 w-10 -mt-0.5 -mr-1 rounded-md border-2 border-orange-200'
-              ></img>
+                className='bg-cyan-950 p-2 h-10 w-10 -mt-0.5 -mr-1 rounded-md border-2'
+              ></img> */}
+              {showPassword ? (
+                <div className='flex items-center w-9 justify-center  bg-black'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='white'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    class=' my-auto h-6 w-5 text-white'
+                    onClick={() => {
+                      setShowPassword(!showPassword);
+                    }}
+                  >
+                    <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'></path>
+                    <circle cx='12' cy='12' r='3'></circle>
+                  </svg>
+                </div>
+              ) : (
+                <div className='flex items-center w-9 justify-center  bg-black'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='white'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    class='  my-auto h-6 w-5 text-white'
+                    onClick={() => {
+                      setShowPassword(!showPassword);
+                    }}
+                  >
+                    <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'></path>
+                    <circle cx='12' cy='12' r='3'></circle>
+                    <path d='M6 6l12 12' stroke='currentColor' stroke-width='2'></path>
+                  </svg>
+                </div>
+              )}
             </div>
           </div>
-          <div className='flex w-[92%] justify-end'>
+          <div className='flex w-[92%] space-x-4 justify-start'>
             <button
               onClick={async () => {
                 await updateProfile();
               }}
-              className='font-light w-1/6 py-2 bg-cyan-900 text-white text-2xl border-2 border-cyan-600 rounded-md'
+              className='font-light w-1/6 py-1 bg-black text-white text-xl rounded-md'
             >
               Save
+            </button>
+            <button
+              onClick={async () => {
+                navigate("/app/profile");
+              }}
+              className='font-light w-1/6 py-1 bg-stone-100 border shadow-sm border-gray-300 text-black text-xl rounded-md'
+            >
+              Cancel
             </button>
           </div>
         </div>

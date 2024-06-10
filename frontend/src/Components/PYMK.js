@@ -55,7 +55,7 @@ const PYMK = ({ username }) => {
         const updatedBool1 = new Array(users.length).fill(false);
         users.forEach((user, idx) => {
           if (result.data.find((item) => item.person2 === user.person1)) {
-            console.log("GETTING HERE");
+            console.log('GETTING HERE');
             console.log(idx);
             updatedBool1[idx] = true;
           }
@@ -155,44 +155,82 @@ const PYMK = ({ username }) => {
     const filteredList = users.filter((user) =>
       user.person1.toLowerCase().includes(searchQuery.toLowerCase()),
     );
+    fetchrequests();
     setFilteredUsers(filteredList);
   }, [users, searchQuery]);
 
   return (
-    <div className='flex flex-col border-2 w-[20%] border-orange-200 shadow-md lg:shadow-2xl lg:h-[45rem] items-center space-y-6 py-3 px-2 bg-orange-50 mr-2 mt-2 h-screen rounded-lg overflow-y-scroll'>
-      <div className='text-cyan-950 text-3xl mb-5 m-4 bg-orange-50'>Find Friends</div>
-      <input
+    <div className='flex space-x-1.5 items-center min-w-[22%] h-[98%]'>
+      <div className='h-[100%] bg-gray-300 ml-1 w-[1.5px]'></div>
+      <div className='w-[100%] items-center space-y-6 py-3 px-2 mr-4 mt-2 h-screen rounded-lg overflow-y-scroll'>
+        <div className='text-gray-950 text-3xl  my-4 '>Find Friends</div>
+        {/* <input
         type='text'
         placeholder='Search users...'
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className='w-full p-2 mb-4 rounded-md border border-gray-300'
-      />
-      {filteredUsers.map((user, idx) => (
-        <div
-          key={user.person1}
-          className='flex flex-row overflow-x-scroll w-full items-center space-x-12 justify-between rounded-md bg-stone-50 shadow-md border-2 border-sky-300 p-3 m-1'
-        >
-          <span className='flex items-center space-x-1'>
-            <img
-              src={`data:image/png;base64,${user.profile}`}
-              className='h-12 w-12 rounded-full'
-              alt={user.person1}
-            />
-            <span className='text-cyan-950 text-lg'>{user.person1}</span>
-          </span>
-          <button
-            onClick={() => {
-              requestsent1(user.person1, idx);
-            }}
-            className={`text-md px-2 py-1.5 border-2 border-sky-800 rounded-md ${
-              bool1[idx] ? 'text-cyan-900 bg-cyan-200' : 'bg-cyan-600 text-white'
-            }`}
-          >
-            {bool1[idx] ? 'Requested' : 'Follow'}
+        className='w-full p-2 mb-4 rounded-md border border-gray-300 bg-stone-50 placeholder-gray-600'
+      /> */}
+        <div className='flex w-full max-w-sm items-center space-x-2'>
+          <input
+            className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+            placeholder='Search'
+            type='search'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button className='inline-flex text-white bg-black items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-12'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='h-4 w-4'
+            >
+              <circle cx='11' cy='11' r='8' />
+              <path d='m21 21-4.3-4.3' />
+            </svg>
+            <span className='sr-only'>Search</span>
           </button>
         </div>
-      ))}
+        <div className='space-y-2.5'>
+          {filteredUsers.map((user, idx) => (
+            <div className='flex flex-col w-full'>
+              <div
+                key={user.person1}
+                className='flex flex-row overflow-x-scroll bg-stone-100 w-full items-center  justify-between rounded-md p-3'
+              >
+                <span className='flex items-center space-x-1.5'>
+                  <img
+                    src={`data:image/png;base64,${user.profile}`}
+                    className='h-12 w-12 rounded-full'
+                    alt={user.person1}
+                  />
+                  <span className='text-cyan-950 text-lg'>{user.person1}</span>
+                </span>
+                <button
+                  onClick={() => {
+                    requestsent1(user.person1, idx);
+                  }}
+                  className={`text-md py-1.5 w-[110px] rounded-md ${
+                    bool1[idx]
+                      ? 'text-black border shadow-sm border-gray-300 bg-white'
+                      : 'bg-black text-white'
+                  }`}
+                >
+                  {bool1[idx] ? 'Requested' : 'Follow'}
+                </button>
+              </div>
+              <div className='w-full h-[2px] bg-gray-300'></div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

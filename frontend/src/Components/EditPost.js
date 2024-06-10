@@ -142,6 +142,7 @@ function EditPost({ posts, idx, id }) {
             <input
               type='file'
               ref={fileInput}
+              className='focus:outline-none'
               style={{ display: 'none' }}
               multiple
               onChange={handlePostImageChange}

@@ -104,7 +104,7 @@ function DashBoard() {
     <div
       className={`flex  ${
         isSmallScreen ? 'flex-col ' : 'flex-row'
-      } w-screen h-screen lg:justify-between `}
+      } w-screen h-screen fixed bg-white lg:justify-between `}
     >
       {!isSmallScreen && <Sidebar username={username} index={0}></Sidebar>}
       {index < 2 ? (

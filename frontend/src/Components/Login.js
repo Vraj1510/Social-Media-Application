@@ -18,8 +18,9 @@ function Login() {
   const navigateToDashboard = (state) => {
     navigate('/app', state);
   };
+  const navigate1 = useNavigate();
   const navigateToOTP = (state) => {
-    navigate('/auth/otp', state);
+    navigate1('/auth/otp', state);
   };
   const check = async () => {
     try {
@@ -35,35 +36,36 @@ function Login() {
           password,
         }),
       });
+      console.log(response);
       if (response.ok) {
-        const responseData = await response.json();
-        console.log(responseData.message);
-        navigateToOTP({ state: { username } });
+        return true; // Login successful
       } else {
         const errorData = await response.json();
         console.error(errorData.error);
         alert('User does not exist or invalid credentials');
+        return false; // Login failed
       }
     } catch (err) {
       console.error('Error during login:', err.message);
+      return false; // Login failed
     }
   };
 
-  // useEffect(() => {
-  //   const disableBackButton = (event) => {
-  //     event.preventDefault();
-  //     return false;
-  //   };
+  useEffect(() => {
+    const disableBackButton = (event) => {
+      event.preventDefault();
+      return false;
+    };
 
-  //   // Disable the back button
-  //   window.history.pushState(null, null, window.location.pathname);
-  //   window.addEventListener('popstate', disableBackButton);
+    // Disable the back button
+    window.history.pushState(null, null, window.location.pathname);
+    window.addEventListener('popstate', disableBackButton);
 
-  //   return () => {
-  //     // Re-enable the back button when the component unmounts
-  //     window.removeEventListener('popstate', disableBackButton);
-  //   };
-  // }, []);
+    return () => {
+      // Re-enable the back button when the component unmounts
+      window.removeEventListener('popstate', disableBackButton);
+    };
+  }, []);
 
   const handleLogin = async () => {
     if (username.trim() === '') {
@@ -72,10 +74,15 @@ function Login() {
       alert('Please fill in password.');
     } else if (!password.match('^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$')) {
       alert(
-        'The password must contain atleast 8 characters, 1 capital alphabet, 1 small alphabet, 1 special character and 1 digit',
+        'The password must contain at least 8 characters, 1 capital alphabet, 1 small alphabet, 1 special character, and 1 digit',
       );
     } else {
-      await check();
+      const loginSuccess = await check();
+      console.log(loginSuccess);
+      if (loginSuccess) {
+        console.log('Reachingggggg here');
+        navigateToOTP({ state: { username } }); // Navigate to OTP page if login is successful
+      }
     }
   };
 
@@ -104,67 +111,127 @@ function Login() {
   }, []);
 
   return (
-    <div className='flex flex-col w-screen h-screen bg-stone-50 justify-center items-center'>
-      <div className='w-3/4 h-3/4 sm:w-3/5 md:w-2/5 lg:w-1/3 sm:h-3/4 lg:h-2/3 border-2 border-orange-300 shadow-lg bg-orange-50 flex flex-col justify-center items-center rounded-lg'>
-        <img src={logoImg} className='h-1/3 w-1/3 pb-10 rounded-full' alt='Image Description' />
-        <input
-          className='mb-4 w-2/3 shadow-sm h-12 border-2 border-sky-300  mt-0.5 text-stone-950 text-lg  bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
-          type='text'
-          placeholder='Username....'
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <div className='flex flex-row w-2/3 shadow-sm mb-10 h-12 border-2 border-sky-300  mt-0.5 text-stone-950 text-lg  bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer '>
+    <div class='flex justify-center items-center h-screen bg-[#f3f4f6]'>
+      <div class='bg-white p-10 rounded-lg shadow-2xl h-[500px] w-[460px]'>
+        <div class='flex flex-col items-center mb-4'>
+          <div class='bg-[#3b82f6] text-white p-2 rounded-full'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              stroke-width='2'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              class='h-16 w-16'
+            >
+              <path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'></path>
+              <path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'></path>
+            </svg>
+          </div>
+          <h2 class='text-3xl font-semibold mt-1 mb-5'>Connecta</h2>
+        </div>
+        <form class='flex flex-col space-y-4'>
           <input
-            className='w-full h-full p-2 placeholder-stone-700 outline-none !important cursor-pointer'
-            type={showPassword ? 'text' : 'password'}
-            placeholder='Password....'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            class='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+            placeholder='Username'
+            type='text'
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+            }}
           />
-          <img
-            onClick={handleImageClick}
-            src={showPassword ? visible : hidden}
-            className='bg-cyan-950 p-2 h-11.5 w-11 '
-          ></img>
-        </div>
-        <button
-          onClick={() => {
-            handleLogin();
-          }}
-          className='h-11 w-1/3 text-stone-50 border-2 border-sky-300 text-lg bg-cyan-950 placeholder-white rounded-xl hover:bg-cyan-600 hover:text-stone-50 font-semibold hover:font-semibold'
-        >
-          Login
-        </button>
-        <div className='flex flex-row w-2/3 items-center -mt-1 justify-between'>
-          <div className='flex-grow h-[1px] bg-gradient-to-r from-transparent to-cyan-950'></div>
-          <div className='z-10 text-cyan-950 text-lg p-3'>OR</div>
-          <div className='flex-grow h-[1px] bg-gradient-to-r from-cyan-950 to-transparent'></div>
-        </div>
-        <Link
-          to='/auth/forgotpassword'
-          className='-mt-2.5 text-sky-900 hover:underline hover:underline-offset-1 cursor-pointer font-normal text-lg'
-        >
-          Forgot Your Password?
-        </Link>
-      </div>
-      <div className='w-3/4 sm:w-3/5 md:w-2/5 lg:w-1/3 mt-4 border-2 border-orange-300 shadow-lg bg-orange-50 flex flex-col justify-center items-center rounded-lg'>
-        <p className='text-left py-2 font-normal text-xl'>
-          Create An Account?{' '}
+          <div class='relative'>
+            <input
+              class='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+              placeholder='Password'
+              type={showPassword ? 'text' : 'password'}
+              name={password}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
+            {showPassword ? (
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                class='absolute inset-y-0 right-0 mr-3 my-auto h-5 w-5 text-gray-500'
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                }}
+              >
+                <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'></path>
+                <circle cx='12' cy='12' r='3'></circle>
+              </svg>
+            ) : (
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                class='absolute inset-y-0 right-0 mr-3 my-auto h-5 w-5 text-gray-500'
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                }}
+              >
+                <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'></path>
+                <circle cx='12' cy='12' r='3'></circle>
+                <path d='M6 6l12 12' stroke='currentColor' stroke-width='2'></path>
+              </svg>
+            )}
+          </div>
           <button
+            onClick={async (e) => {
+              e.preventDefault(); // Prevent default form submission behavior
+              await handleLogin();
+            }}
+            class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full bg-black text-white'
+          >
+            Login
+          </button>
+          <div class='flex items-center justify-center'>
+            <span class='bg-white px-2 -mt-1 text-md text-gray-500'>OR</span>
+          </div>
+          <div class='flex items-center justify-center'>
+            <a
+              class='text-md text-center -mt-3 text-blue-600 hover:underline'
+              href='/auth/forgotpassword'
+            >
+              Forgot Your Password?
+            </a>
+          </div>
+        </form>
+
+        <div class='mt-7 text-center'>
+          <span class='text-md text-gray-500'>Create An Account?</span>
+          <a
             onClick={() => {
               navigate('/auth/signup');
             }}
-            className='text-cyan-800 text-xl font-medium hover:underline hover:underline-offset-2'
+            class='text-md text-blue-600 hover:underline'
+            href='#'
           >
+            {' '}
             Register
-          </button>
-        </p>
-      </div>{' '}
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
-
 export default Login;

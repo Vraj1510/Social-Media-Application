@@ -43,6 +43,11 @@ export const IndexProvider = ({ children }) => {
   const updateUsername = (value) => {
     setUsername(value);
   };
+
+  const [person2, setPerson2] = useState('');
+  const updatePerson2 = (value) => {
+    setPerson2(value);
+  };
   const [edit, setEdit] = useState(-1);
   const updateEdit = (value) => {
     setEdit(value);
@@ -61,6 +66,8 @@ export const IndexProvider = ({ children }) => {
         updateUsername,
         edit,
         updateEdit,
+        person2,
+        updatePerson2,
       }}
     >
       {children}

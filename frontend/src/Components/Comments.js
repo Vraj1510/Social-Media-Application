@@ -15,7 +15,6 @@ import { BiHappy } from 'react-icons/bi';
 const Comments = ({ id, comments1 }) => {
   const [commentdisplay, setcommentdisplay] = useState([]);
   const [map, setMap] = useState(new Map());
-  const [map1, setMap1] = useState(new Map());
   const [replyid, setReplyId] = useState(-1);
   const [replycomment, setReplyComment] = useState([]);
   const [value, setValue] = useState('');
@@ -24,6 +23,7 @@ const Comments = ({ id, comments1 }) => {
   const [comments, setcomments] = useState([...comments1]);
   const [delete1, setdelete1] = useState(false);
   const [emoji, setemoji] = useState(false);
+  const [imageURL, setImageURL] = useState();
   console.log(comments1);
   const insertcomment = async () => {
     var myHeaders = new Headers();
@@ -133,6 +133,28 @@ const Comments = ({ id, comments1 }) => {
       console.error('Error fetching image:', err.message);
     }
   };
+
+  const fetchProfileImage1 = async () => {
+    try {
+      var username1 = username;
+      const body = { username1 };
+      const response = await fetch('http://localhost:3001/fetchImage', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+      console.log(result);
+      setImageURL(result.imageContent);
+    } catch (err) {
+      console.error('Error fetching image:', err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileImage1();
+  }, [username]);
+
   const buildTree = (comments) => {
     const commentMap = new Map();
     comments.forEach((comment) => {
@@ -309,12 +331,14 @@ const Comments = ({ id, comments1 }) => {
     fetchData();
   }, [comments]);
   useEffect(() => {
+    console.log(commentsWithProfile);
     commentsWithProfile.map((comment1) => {
       map.set(comment1.comment_id, comment1);
     });
+    console.log(map.get(115));
   }, [commentsWithProfile]);
   useEffect(() => {
-    map.clear();
+    // map.clear();
     Commentdis().then((arr) => {
       console.log(arr);
       setcommentdisplay(arr);
@@ -333,29 +357,27 @@ const Comments = ({ id, comments1 }) => {
             comment2.reply_id !== -1 ? (
               <div
                 key={comment2.comment_id}
-                className={`border-2 border-gray-200 my-1.5 px-1 py-0.5 rounded-md shadow-sm text-sky-950 items-center ${
-                  comment2.reply_id !== -1 ? 'ml-auto bg-sky-100' : 'bg-orange-50'
+                className={`border my-1.5 px-1 py-1 rounded-md shadow-md text-sky-950 items-center ${
+                  comment2.reply_id !== -1 ? 'ml-auto bg-stone-100' : 'bg-stone-100'
                 }`}
                 style={{ width: 'max-content' }}
               >
                 {/* {console.log(map.get(comment2.reply_id))} */}
                 <div className='flex items-center space-x-2 max-w-5/6 p-1'>
                   <div className='flex flex-col'>
-                    <div className='flex flex-row items-center space-x-8 justify-between'>
-                      <div className='flex flex-row items-center space-x-1'>
-                        {/* {await fetchProfileImage(comment2.user_name)} */}
-                        {/* <img
-                          src={`data:image/png;base64,${comment2.profile}`}
-                          className='h-12 w-12'
+                    <div className='flex flex-row items-center space-x-16 justify-between'>
+                      <div className='flex flex-row items-center space-x-1.5'>
+                        <img
+                          src={comment2.profile}
+                          className='h-12 w-12 rounded-full'
                           alt='Profile'
-                        ></img> */}
+                        ></img>
                         <div className='text-xl font-medium'>{comment2.username}</div>
                         <div className='text-sm font-regular text-gray-500'>
                           {getTimeDifference(comment2)}
                         </div>
                       </div>
-                      <div className='flex items-center mt-0.5 space-x-1'>
-                        {/* <div className='flex flex-row items-center mt-0.5 space-x-1'> */}
+                      <div className='flex items-center -mt-1 space-x-1'>
                         {(delete1 || comment2.username === username) && (
                           <img
                             src={bin1}
@@ -368,8 +390,6 @@ const Comments = ({ id, comments1 }) => {
                         <button
                           onClick={async () => {
                             try {
-                              // socket.connect();
-                              // socket.emit('replycomm', [username, comment2.comment_id]);
                               await getReplyComment(comment2.comment_id);
                             } catch (err) {
                               console.log(err);
@@ -380,41 +400,43 @@ const Comments = ({ id, comments1 }) => {
                           Reply
                         </button>
                         <Comment_like id={comment2.comment_id} username={username}></Comment_like>
-                        {/* </div> */}
                       </div>
                     </div>
-                    {/* <div className="bg-white my-1">{map.get(comment2.reply_id).comment}</div> */}
-                    <div
-                      key={map.get(comment2.reply_id).comment_id}
-                      className={`border-2 border-gray-200 my-1.5 w-full rounded-md shadow-lg text-sky-950 items-center bg-white mx-auto`}
-                      style={{ maxWidth: 'calc(100% - 0.5rem)' }} // Adjusted max width to maintain equal spacing
-                      onClick={() => scrollToComment(comment2.reply_id)}
-                    >
-                      <div className='flex items-center space-x-2 max-w-5/6 p-1'>
-                        {/* <img
-                          src={`data:image/png;base64,${comment2.profile}`}
-                          className='h-10 w-10'
-                          alt='Profile'
-                        ></img> */}
-                        <div className='flex flex-col'>
-                          <div className='flex flex-row items-center justify-between'>
-                            <div className='flex flex-row items-center space-x-1'>
-                              <div className='text-lg font-medium'>
-                                {map.get(comment2.reply_id).username}
-                              </div>
-                              <div className='text-sm font-regular text-gray-500'>
-                                {getTimeDifference(map.get(comment2.reply_id))}
+                    {console.log(map)}
+                    {map.get(comment2.reply_id) && (
+                      <div
+                        key={map.get(comment2.reply_id).comment_id}
+                        className={`border my-1 mt-2 p-0.5 w-full rounded-md shadow-sm text-sky-950 items-center bg-white mx-auto`}
+                        style={{ maxWidth: 'calc(100% - 0.5rem)' }} // Adjusted max width to maintain equal spacing
+                        onClick={() => scrollToComment(comment2.reply_id)}
+                      >
+                        <div className='flex items-center space-x-2 max-w-5/6 p-1'>
+                          <img
+                            src={map.get(comment2.reply_id).profile}
+                            className='rounded-full h-10 w-10'
+                            alt='Profile'
+                          ></img>
+                          <div className='flex flex-col'>
+                            <div className='flex flex-row items-center justify-between'>
+                              <div className='flex flex-row items-center space-x-1'>
+                                <div className='text-lg font-medium'>
+                                  {console.log(map.get(comment2.reply_id))}
+                                  {map.get(comment2.reply_id).username}
+                                </div>
+                                <div className='text-sm font-regular text-gray-500'>
+                                  {getTimeDifference(map.get(comment2.reply_id))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className='text-sm font-regular -mt-1 ml-0.5'>
-                            {map.get(comment2.reply_id).comment}
+                            <div className='text-sm font-regular -mt-1 ml-0.5'>
+                              {map.get(comment2.reply_id).comment}
+                            </div>
                           </div>
                         </div>
+                        <div className='flex justify-center'></div>
                       </div>
-                      <div className='flex justify-center'></div>
-                    </div>
-                    <div className='text-md font-regular'>{comment2.comment}</div>
+                    )}
+                    <div className='text-md font-regular ml-1'>{comment2.comment}</div>
                   </div>
                 </div>
                 <div className='flex justify-center'></div>
@@ -422,15 +444,19 @@ const Comments = ({ id, comments1 }) => {
             ) : (
               <div
                 key={comment2.comment_id}
-                className={`border-2 border-gray-200 my-1.5 rounded-md shadow-sm text-sky-950 items-center ${
-                  comment2.reply_id !== -1 ? 'ml-auto bg-sky-100' : 'bg-orange-50'
+                className={`border my-1.5 py-0.5 rounded-md shadow-sm text-sky-950 items-center ${
+                  comment2.reply_id !== -1 ? 'ml-auto bg-stone-100' : 'bg-stone-100'
                 }`}
                 style={{ width: 'max-content' }}
               >
                 <div className='flex items-center space-x-2 max-w-5/6 p-1'>
-                  <img src={comment2.profile} className='h-12 w-12' alt='Profile'></img>
-                  <div className='flex flex-col'>
-                    <div className='flex flex-row items-center space-x-8 justify-between'>
+                  <img
+                    src={comment2.profile}
+                    className='rounded-full h-12 w-12'
+                    alt='Profile'
+                  ></img>
+                  <div className='flex flex-col mb-0.5'>
+                    <div className='flex flex-row items-center -mt-0.5 space-x-12'>
                       <div className='flex flex-row items-center space-x-1'>
                         <div className='text-xl font-medium'>{comment2.username}</div>
                         <div className='text-sm font-regular text-gray-500'>
@@ -450,10 +476,6 @@ const Comments = ({ id, comments1 }) => {
                         <button
                           onClick={async () => {
                             try {
-                              // socket.connect();
-                              // socket.emit('replycomm', [username, comment2.comment_id]);
-                              // setReplyId(comment2.comment_id);
-                              // await
                               await getReplyComment(comment2.comment_id);
                             } catch (err) {
                               console.log(err);
@@ -467,7 +489,7 @@ const Comments = ({ id, comments1 }) => {
                         {console.log(delete1)}
                       </div>
                     </div>
-                    <div className='text-md font-regular'>{comment2.comment}</div>
+                    <div className='text-md font-regular -mt-0.5'>{comment2.comment}</div>
                   </div>
                 </div>
                 <div className='flex justify-center'></div>
@@ -476,22 +498,26 @@ const Comments = ({ id, comments1 }) => {
           )}
       </div>
       <div className='flex flex-row space-x-2 items-center'>
-        <div className='-mb-2  w-full'>
+        <div className=' -mb-2 w-full'>
           {/* <MainComment id={post.id} username={username}></MainComment> */}
-          <div className='flex flex-col -mt-3 relative'>
+          <div className='flex flex-col items-center -mt-3 relative'>
             {emoji && (
-              <div className='flex flex-row justify-end absolute right-0 border-2  border-sky-300 rounded-xl bottom-full '>
+              <div className='flex flex-row justify-end absolute right-0 border border-gray-400 rounded-md  3rounded-xl bottom-full '>
                 <EmojiPicker height={400} width={300} onEmojiClick={handleEmojiClick}></EmojiPicker>
               </div>
             )}
             {replyid !== -1 && (
               <div
                 key={replycomment[0].comment_id}
-                className='bg-orange-50 border-2 w-auto border-gray-200  rounded-md shadow-sm text-sky-950 items-center'
+                className='bg-stone-50 p-1.5 border w-[98%] mr-1 mb-1 rounded-md shadow-sm text-sky-950 items-center'
                 // style={{ width: 'max-content' }}
               >
-                <div className='flex items-center space-x-2 max-w-5/6 p-1'>
-                  <img src={replycomment[0].profile} className='h-12 w-12'></img>
+                {console.log(replycomment)}
+                <div className='flex items-center space-x-2 max-w-5/6'>
+                  <img
+                    src={map.get(replycomment[0].comment_id).profile}
+                    className='rounded-full h-12 w-12'
+                  ></img>
                   <div className='flex flex-col'>
                     <div className='flex flex-row items-center space-x-8 justify-between'>
                       <div className='flex flex-row items-center space-x-1'>
@@ -507,7 +533,7 @@ const Comments = ({ id, comments1 }) => {
                 </div>
                 <img
                   src={remove}
-                  className='h-4 w-4 absolute -top-3 -right-0.5'
+                  className='h-4 w-4 absolute -top-3 right-0'
                   onClick={() => {
                     setReplyComment([]);
                     setReplyId(-1);
@@ -518,30 +544,65 @@ const Comments = ({ id, comments1 }) => {
           </div>
         </div>
       </div>
-      <div className='flex flex-row h-11 w-full mt-2  bg-white border-2 border-sky-300 shadow-sm rounded-md py-1 items-center'>
+      <div className='flex flex-row h-11 w-full mt-2 py-1 items-center'>
+        <img src={`data:image/png;base64,${imageURL}`} className='h-10 w-10 rounded-full mr-2' />
         <input
-          placeholder='Add A Comment'
+          class='flex h-10 placeholder:text-stone-500 w-full rounded-md border bg-stone-50 border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1'
+          type='text'
+          placeholder='Add a comment...'
           value={value}
-          className='px-2 w-full outline-none'
           onChange={(e) => setValue(e.target.value)}
-        ></input>
+        />
+        <button
+          onClick={() => {
+            setemoji(!emoji);
+          }}
+          class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
+        >
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            stroke-width='2'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            class='h-5 w-5'
+          >
+            <circle cx='12' cy='12' r='10'></circle>
+            <path d='M8 14s1.5 2 4 2 4-2 4-2'></path>
+            <line x1='9' x2='9.01' y1='9' y2='9'></line>
+            <line x1='15' x2='15.01' y1='9' y2='9'></line>
+          </svg>
+          <span class='sr-only'>Add emoji</span>
+        </button>
         <button
           onClick={() => {
             if (value !== '') {
               insertcomment();
             }
           }}
-          className='bg-sky-300 rounded-md text-sky-900 border-2 border-sky-600 my-1 px-2'
+          class='inline-flex items-center -ml-1 justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'
         >
-          Post
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            stroke-width='2'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            class='h-5 w-5'
+          >
+            <path d='m22 2-7 20-4-9-9-4Z'></path>
+            <path d='M22 2 11 13'></path>
+          </svg>
+          <span class='sr-only'>Send comment</span>
         </button>
-        <RoundedBtn
-          onClick={() => {
-            setemoji(!emoji);
-          }}
-          size='25px'
-          icon={<BiHappy />}
-        />
       </div>
     </div>
   );

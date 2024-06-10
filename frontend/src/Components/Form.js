@@ -48,7 +48,7 @@ const Form = ({ onSubmit }) => {
                 type='text'
                 name='firstName'
                 placeholder='First Name'
-                className='m-3 p-2 text-lgrounded-md h-[2.5rem]'
+                className='m-3 p-2 focus:outline-none text-lgrounded-md h-[2.5rem]'
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 onFocus={formik.handleBlur}

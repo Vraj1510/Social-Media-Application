@@ -71,12 +71,24 @@ function Like({ id }) {
   }, [username]);
 
   return (
-    <img
-      onClick={likePostHandle}
-      src={liked ? like1 : like}
-      className='w-7 h-7 lg:w-8 lg:h-8 md:w-8 md:h-8'
-      alt='Like Icon'
-    />
+    // <img
+    <button class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10'>
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
+        width='24'
+        height='24'
+        viewBox='0 0 24 24'
+        fill='none'
+        stroke='currentColor'
+        stroke-width='2'
+        stroke-linecap='round'
+        stroke-linejoin='round'
+        class='h-5 w-5'
+      >
+        <path d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'></path>
+      </svg>
+      <span class='sr-only'>Like</span>
+    </button>
   );
 }
 

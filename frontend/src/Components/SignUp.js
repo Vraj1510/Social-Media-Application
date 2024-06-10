@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import visible from '../Images/visible.png';
-import hidden from '../Images/hidden.png';
-import logoImg from '../Images/logo.jpeg';
 import { useNavigate } from 'react-router-dom';
 import { useIndex } from './IndexContext';
 function SignUp() {
@@ -11,9 +7,6 @@ function SignUp() {
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { setUsername } = useIndex();
-  const handleImageClick = () => {
-    setShowPassword(!showPassword);
-  };
   var bool1 = true;
   const registerjwt = async () => {
     const myHeaders = new Headers();
@@ -60,8 +53,8 @@ function SignUp() {
       console.error('Error during login:', err.message);
     }
   };
-  const Input = async (e) => {
-    e.preventDefault();
+  const Input = async () => {
+    // e.preventDefault();
     try {
       const body = { username, password, email };
       const response = await fetch('http://localhost:3001/insert', {
@@ -104,64 +97,131 @@ function SignUp() {
     } else {
       await checkUser();
       await Input(e);
-      // navigateToDashboard({ state: { username } });
+      await registerjwt();
+      navigateToDashboard({ state: { username } });
       // }
     }
   };
 
   return (
-    <div className='flex flex-col w-screen h-screen bg-stone-50 justify-center items-center'>
-      <div className='w-3/4 h-3/4 sm:w-3/5 md:w-2/5 lg:w-1/3 sm:h-3/4 lg:h-2/3 border-2 border-orange-300 shadow-lg bg-orange-50 flex flex-col justify-center items-center rounded-lg'>
-        <img src={logoImg} className='h-1/3 w-1/3 pb-10 rounded-full' alt='Image Description' />
-        <input
-          className='mb-4 w-2/3 shadow-sm h-12 border-2 border-sky-300  mt-0.5 text-stone-950 text-lg  bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
-          type='text'
-          placeholder='Username....'
-          value={username}
-          onChange={(e) => setUsername1(e.target.value)}
-          required
-        />
-        <div className='flex flex-row w-2/3 shadow-sm mb-4 h-12 border-2 border-sky-300  mt-0.5 text-stone-950 text-lg  bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer '>
-          <input
-            className='w-full h-full p-2 placeholder-stone-700 outline-none !important cursor-pointer'
-            type={showPassword ? 'text' : 'password'}
-            placeholder='Password....'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <img
-            onClick={handleImageClick}
-            src={showPassword ? visible : hidden}
-            className='bg-cyan-950 p-2 h-11.5 w-11 '
-          ></img>
+    <div class='select-none flex justify-center items-center h-screen bg-[#f3f4f6]'>
+      <div class='bg-white p-10 rounded-lg shadow-2xl h-[500px] w-[460px]'>
+        <div class='flex flex-col items-center mb-4'>
+          <div class='bg-[#3b82f6] text-white p-2 rounded-full'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              stroke-width='2'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              class='h-16 w-16'
+            >
+              <path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'></path>
+              <path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'></path>
+            </svg>
+          </div>
+          <h2 class='text-3xl font-semibold mt-1 mb-5'>Connecta</h2>
         </div>
-        <input
-          className='mb-8 w-2/3 shadow-sm h-12 border-2 border-sky-300  mt-0.5 text-stone-950 text-lg  bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
-          type='text'
-          placeholder='Email....'
-          value={username}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <button
-          onClick={handleSignUp}
-          className='h-11 w-1/3 text-stone-50 border-2 border-sky-300 text-lg bg-cyan-950 placeholder-white rounded-xl hover:bg-cyan-600 hover:text-stone-50 font-semibold hover:font-semibold'
-        >
-          Register
-        </button>
-      </div>
-      <div className='w-3/4 sm:w-3/5 md:w-2/5 lg:w-1/3 mt-1.5 border-2 border-orange-300 shadow-lg bg-orange-50 flex flex-col justify-center items-center rounded-lg'>
-        <p className='text-left py-2 font-normal text-xl'>
-          Already Have An Account?{' '}
-          <Link
-            to='/auth'
-            className='text-cyan-800 text-xl font-medium hover:underline hover:underline-offset-2'
+        <form class='flex flex-col space-y-4'>
+          <input
+            class='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+            placeholder='Username'
+            type='text'
+            name={username}
+            value={username}
+            onChange={(e) => {
+              setUsername1(e.target.value);
+            }}
+          />
+          <div class='relative'>
+            <input
+              class='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+              placeholder='Password'
+              type={showPassword ? 'text' : 'password'}
+              name={password}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
+            {showPassword ? (
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                class='absolute inset-y-0 right-0 mr-3 my-auto h-5 w-5 text-gray-500'
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                }}
+              >
+                <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'></path>
+                <circle cx='12' cy='12' r='3'></circle>
+              </svg>
+            ) : (
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                class='absolute inset-y-0 right-0 mr-3 my-auto h-5 w-5 text-gray-500'
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                }}
+              >
+                <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'></path>
+                <circle cx='12' cy='12' r='3'></circle>
+                <path d='M6 6l12 12' stroke='currentColor' stroke-width='2'></path>
+              </svg>
+            )}
+          </div>
+          <input
+            class='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+            placeholder='Email'
+            type='text'
+            name={email}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+          />
+          <button
+            onClick={() => {
+              handleSignUp();
+            }}
+            class='inline-flex items-center justify-center whitespace-nowrap rounded-md text-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full bg-black text-white'
           >
+            Register
+          </button>
+        </form>
+        <div class='mt-8 text-center'>
+          <span class='text-md text-gray-500'>Already Have An Account?</span>
+          <a
+            onClick={() => {
+              navigate('/auth');
+            }}
+            class='text-md text-blue-600 hover:underline'
+            href='#'
+          >
+            {' '}
             Login
-          </Link>
-        </p>
-      </div>{' '}
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
