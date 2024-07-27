@@ -1,14 +1,14 @@
 import React from 'react';
-import { BrowserRouter as  Route, Routes } from 'react-router-dom';
-import SignUp from './Components/SignUp';
-import Login from './Components/Login';
-import Dashboard from './Components/DashBoard';
-import Profile from './Components/Profile';
-import Profile1 from './Components/Profile1';
-import OTP from './Components/OTP';
-import ChatHome from './Components/ChatHome';
+import { BrowserRouter as Route, Routes } from 'react-router-dom';
+import SignUp from './Components/Auth/SignUp';
+import Login from './Components/Auth/Login';
+import Dashboard from './Components/Home/DashBoard';
+import Profile from './Components/Home/Profile';
+import Profile1 from './Components/Home/Profile1';
+import OTP from './Components/Auth/OTP';
+import ChatHome from './Components/Chats/ChatHome';
 import Router from './routes';
-import { IndexProvider } from './Components/IndexContext';
+import { IndexProvider } from './Components/IndexContext/IndexContext';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 const queryClient = new QueryClient();

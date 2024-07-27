@@ -2,19 +2,18 @@ import { Suspense, lazy } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 import React from 'react';
 import { BrowserRouter as Route, Routes } from 'react-router-dom';
-import SignUp from '../Components/SignUp';
-import Login from '../Components/Login';
-import Dashboard from '../Components/DashBoard';
-import Profile from '../Components/Profile';
-import Profile1 from '../Components/Profile1';
-import OTP from '../Components/OTP';
-import ChatHome from '../Components/ChatHome';
-import Page404 from '../Components/Page404';
-import ForgotPassword from '../Components/ForgotPassword';
-import { IndexProvider } from '../Components/IndexContext';
-import LoadingScreen from '../Components/LoadingScreen';
-import ResetPassword from '../Components/ResetPassword';
-import EditProfile from '../Components/EditProfile';
+import SignUp from '../Components/Auth/SignUp';
+import Login from '../Components/Auth/Login';
+import Dashboard from '../Components/Home/DashBoard';
+import Profile from '../Components/Home/Profile';
+import Profile1 from '../Components/Home/Profile1';
+import OTP from '../Components/Auth/OTP';
+import ChatHome from '../Components/Chats/ChatHome';
+import Page404 from '../Components/Page404/Page404';
+import ForgotPassword from '../Components/Auth/ForgotPassword';
+import { IndexProvider } from '../Components/IndexContext/IndexContext';
+import ResetPassword from '../Components/Auth/ResetPassword';
+import EditProfile from '../Components/Home/EditProfile';
 // import EditP
 // function App() {
 //   return (
@@ -35,13 +34,6 @@ import EditProfile from '../Components/EditProfile';
 // }
 
 // export default App;
-const Loadable = (Component) => (props) => {
-  return (
-    <Suspense fallback={<LoadingScreen />}>
-      <Component {...props} />
-    </Suspense>
-  );
-};
 // const Login = Loadable(lazy(() => import('../Components/Login')));
 // const SignUp = Loadable(lazy(() => import('../Components/SignUp')));
 // const DashBoard = Loadable(lazy(() => import('../Components/DashBoard')));
@@ -50,9 +42,6 @@ const Loadable = (Component) => (props) => {
 // const OTP = Loadable(lazy(() => import('../Components/OTP')));
 // const ChatHome = Loadable(lazy(() => import('../Components/ChatHome')));
 // const Page404 = Loadable(lazy(() => import('../Components/Page404')));
-// const LoadingScreen = Loadable(lazy(() => import('../Components/LoadingScreen')));
-
-
 export default function Router() {
   return useRoutes([
     // Define the default route as '/auth'

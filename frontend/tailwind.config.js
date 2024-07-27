@@ -5,10 +5,9 @@ module.exports = {
     extend: {
       backgroundImage: {
         'custom-image':
-          "url('/Users/vrajshah1510/Documents/Social-Media-Application/frontend/src/Images/whatsapp.jpeg')",
+          "url('/Users/vrajshah1510/Documents/Social-Media-Application/frontend/src/Images/chatwallpaper.jpg_large')",
       },
     },
   },
   plugins: [],
 };
-
